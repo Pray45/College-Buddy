@@ -1,6 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
-import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { usePathname, useRouter } from 'expo-router';
 
 const RecentUpdates = ({ updates }: { updates: { title: string; description: string }[] }) => {
@@ -13,7 +12,7 @@ const RecentUpdates = ({ updates }: { updates: { title: string; description: str
         
         router.push({
             pathname: "/(tabs)/notification/[notification]",
-            params: { notification: updateroute, from: currentPath },
+            params: { notification: updateroute, from: currentPath }, 
         });
     };
 

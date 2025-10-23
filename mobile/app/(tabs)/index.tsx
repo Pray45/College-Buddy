@@ -1,14 +1,18 @@
+import "../global.css";
 import Ionicons from "@expo/vector-icons/build/Ionicons.js";
 import RecentUpdates from "../components/RecentUpdates";
 import Quicklinks from "../components/Quicklinks";
-import "../global.css";
 import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 import UpcomingEvents from "../components/UpcomingEvents";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
+import { useAuthStore } from "../store/authStore";
 
 export default function App() {
 
   const router = useRouter();
+  const isLoggedin = useAuthStore((state) => state.isLoggedin) 
+  
+  if (!isLoggedin) return <Redirect href="/(auth)/log-in" />;
 
   const updates = [
     {
@@ -85,5 +89,5 @@ export default function App() {
       </Text>
 
     </ScrollView>
-  );
+  )
 }
