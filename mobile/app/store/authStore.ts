@@ -3,8 +3,8 @@ import axios from 'axios';
 
 type AuthState = {
 
-    register: (email: string, password: string, confirmPassword: string) => Promise<void>;
-    login: (email: string, password: string) => Promise<void>;
+    register: (email: string, enrollment: string, password: string, confirmPassword: string) => Promise<void>;
+    login: (email: string, enrollment: string, password: string) => Promise<void>;
     logout: () => void;
 
     isLoggedin: boolean;
@@ -29,7 +29,7 @@ type AuthState = {
 
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({ 
+const useAuthStore = create<AuthState>((set, get) => ({
 
 
     // initial values of the store
@@ -46,93 +46,88 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setLoading: (loading: boolean) => set({ loading }),
 
 
+
     // register function
 
-    register: async (email: string, password: string, confirmPassword: string) => {
 
+
+    register: async (email: string, enrollment: string, password: string) => {
         try {
+            set({ loading: true });
 
-            if (password === confirmPassword) {
+            const response = await axios.post(`http://10.50.160.138:3000/api/auth/register`, {
+                email,
+                password,
+                enrollment_no: enrollment
+            });
 
-                set({ loading: true });
-
-                const response = await axios.post(`http://localhost:3000/api/register`, { email, password })
-
-                if (response.data && response.data.token) {
-                    set({
-                        token: response.data.token,
-                        userData: response.data.userData,
-                        isLoggedin: true
-                    });
-                }
-
+            if (response.data.result === true && response.data.token) {
+                set({
+                    token: response.data.token,
+                    userData: response.data.user,
+                    isLoggedin: true
+                });
             } else {
-                throw new Error("Passwords do not match");
+                console.error("Registration failed:", response.data.message);
+                throw new Error(response.data.message || "Registration failed");
             }
-
-        } catch (error) {
-            console.log("Registration failed:", error);
+        } catch (error: any) {
+            console.error("Registration failed:", error.response?.data || error.message || error);
+            throw error;
         } finally {
             set({ loading: false });
         }
-
     },
+
+
 
 
     // isLoggedIn
 
 
-    login: async (email: string, password: string) => {
 
+
+    login: async (email: string, enrollment: string, password: string) => {
         try {
-
             set({ loading: true });
-
-            const response = await axios.post('http://localhost:3000/api/login', { email, password })
-
-            if (response.data && response.data.token) {
-
+            const response = await axios.post(`http://10.50.160.138:3000/api/auth/login`, { email, enrollment_no: enrollment, password })
+            if (response.data.result === true && response.data.token) {
                 set({
                     token: response.data.token,
-                    userData: response.data.userData,
+                    userData: response.data.user,
                     isLoggedin: true
                 });
-                
             }
-
-
         } catch (error) {
-
             console.error("Login failed:", error);
             set({ isLoggedin: false });
-
         } finally {
             set({ loading: false });
         }
-
     },
+
+
 
 
     // logout function
 
 
+
+
     logout: () => {
-
         try {
-
             set({
                 token: null,
                 userData: null,
                 isLoggedin: false,
             });
-
         } catch (error) {
             console.error("Logout failed:", error);
         } finally {
             set({ loading: false });
         }
-
     }
 
-
 }))
+
+export default useAuthStore;
