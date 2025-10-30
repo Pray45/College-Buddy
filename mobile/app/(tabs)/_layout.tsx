@@ -1,8 +1,9 @@
 import React from 'react'
-import { Tabs } from 'expo-router'
+import { Tabs, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 
-const _layout = () => { 
+const TabsLayout = () => {
+  const router = useRouter();
   return (
     <Tabs screenOptions={{
       tabBarStyle: {
@@ -56,12 +57,18 @@ const _layout = () => {
         tabBarActiveTintColor: '#00FF88',
         tabBarInactiveTintColor: '#A0A0A0',
         headerShown: false,
-        tabBarIcon: ({ color }) => (<Ionicons name="notifications" size={24} color={color} />)
+        tabBarIcon: ({ color }) => (<Ionicons name="notifications" size={24} color={color} />),
       }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push('/(tabs)/notification/');
+          },
+        }}
       />
 
     </Tabs>
   )
 }
 
-export default _layout
+export default TabsLayout

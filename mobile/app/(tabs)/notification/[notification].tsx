@@ -7,7 +7,7 @@ const Notification = () => {
     const router = useRouter();
     const { from, notification } = useLocalSearchParams<{ from?: string; notification?: string }>();
 
-    const displayTitle = (notification ?? '').split('-')
+    const displayTitle = (notification ?? '').split(' ')
         .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
         .join(' ');
 

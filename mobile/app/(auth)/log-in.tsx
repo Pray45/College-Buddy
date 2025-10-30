@@ -19,8 +19,9 @@ const Login = () => {
 
     const onSubmit = async () => {
         setError(null);
-        if (!email || !password || !enrollment) {
-            setError('Please enter email, enrollment number, and password');
+        
+        if (!password || (!email && !enrollment)) {
+            setError('Please enter password and either email or enrollment number');
             return;
         }
 

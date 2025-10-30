@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "mobile",
-    "slug": "mobile",
+    "slug": "collegebuddy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -44,6 +44,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2c0dec86-fbf6-46f8-ac0a-c084e9d68dfc"
+      },
+      "apiBaseUrl": "http://10.237.71.138:3000/api"
+    },
+    "owner": "pray45"
   }
 }

@@ -21,7 +21,7 @@ const Signin = () => {
 
   const onRegister = async () => {
     setError(null);
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !enrollment) {
       setError('Please fill all fields');
       return;
     }
@@ -31,7 +31,8 @@ const Signin = () => {
     }
 
     try {
-      await register(email, enrollment, password);
+      await register(email, enrollment, password, name);
+      // Navigation will happen automatically via the redirect in the component
     } catch (e: any) {
       setError(e?.message || 'Registration failed');
     }

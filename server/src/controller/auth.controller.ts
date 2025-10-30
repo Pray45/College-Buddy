@@ -2,8 +2,7 @@ import type { Request, Response } from 'express';
 import prisma from '../config/Prisma_connect';
 import bcrypt from 'bcrypt';
 import { SALT_ROUNDS } from '../config/constants';
-import { createJWT } from '../utils/JWT';
-
+import { create_Access_Token, create_Refresh_Token, verifyRefreshToken } from '../utils/JWT';
 
 export const RegisterHandler = async (req: Request, res: Response) => {
     try {
@@ -25,22 +24,37 @@ export const RegisterHandler = async (req: Request, res: Response) => {
 
         const hashed = await bcrypt.hash(password, SALT_ROUNDS);
 
-        const create = await prisma.user.create({ data: { email, password: hashed, enrollment_no, name: name ?? null } });
-        const token = await createJWT({ userId: create.id });
+        const createData: any = { 
+            email, 
+            password: hashed, 
+            enrollment_no
+        };
+        if (name) createData.name = name;
+
+        const user = await prisma.user.create({ data: createData });
+
+        const accessToken = create_Access_Token({ userId: user.id });
+        const refreshToken = create_Refresh_Token({ userId: user.id });
 
         const safeUser = {
-            id: create.id,
-            email: create.email,
-            name: create.name,
-            enrollment_no: create.enrollment_no,
-            createdAt: create.createdAt
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            enrollment_no: user.enrollment_no,
+            createdAt: user.createdAt
         };
 
-        return res.status(201).json({ message: 'User created', result: true, user: safeUser, token });
+        return res.status(201).json({
+            message: 'User created successfully',
+            result: true,
+            user: safeUser,
+            accessToken,
+            refreshToken
+        });
 
     } catch (error) {
         console.error('RegisterHandler error:', error);
-        return res.status(500).json({ message: 'internal server error', result: false });
+        return res.status(500).json({ message: 'Internal server error', result: false });
     }
 };
 
@@ -65,19 +79,62 @@ export const LoginHandler = async (req: Request, res: Response) => {
         if (!user) return res.status(401).json({ message: 'Invalid credentials', result: false });
 
         const passwordMatches = await bcrypt.compare(password, user.password);
-        if (!passwordMatches) return res.status(401).json({ message: 'Password doesn\'t match', result: false });
+        if (!passwordMatches) return res.status(401).json({ message: 'Invalid credentials', result: false });
 
-        const token = await createJWT({ userId: user.id });
+        const accessToken = create_Access_Token({ userId: user.id });
+        const refreshToken = create_Refresh_Token({ userId: user.id });
 
-        // return safe user object
-        const safeUser = { id: user.id, email: user.email, enrollment_no: user.enrollment_no, createdAt: user.createdAt };
+        const safeUser = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            enrollment_no: user.enrollment_no,
+            createdAt: user.createdAt
+        };
 
-        return res.status(200).json({ message: 'Login successful', result: true, user: safeUser, token });
+        return res.status(200).json({
+            message: 'Login successful',
+            result: true,
+            user: safeUser,
+            accessToken,
+            refreshToken
+        });
+
     } catch (error) {
         console.error('LoginHandler error:', error);
-        return res.status(500).json({ message: 'internal server error', result: false });
+        return res.status(500).json({ message: 'Internal server error', result: false });
     }
 };
 
 
-export default { LoginHandler, RegisterHandler };
+
+export const RefreshTokenHandler = async (req: Request, res: Response) => {
+    try {
+        const { refreshToken } = req.body;
+        
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'No refresh token provided', result: false });
+        }
+
+        const decoded = verifyRefreshToken(refreshToken);
+        
+        if (!decoded || !decoded.userId) {
+            return res.status(403).json({ message: 'Invalid or expired refresh token', result: false });
+        }
+
+        // Generate new tokens
+        const newAccessToken = create_Access_Token({ userId: decoded.userId });
+        const newRefreshToken = create_Refresh_Token({ userId: decoded.userId });
+
+        return res.status(200).json({
+            message: 'Tokens refreshed successfully',
+            result: true,
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        });
+
+    } catch (error) {
+        console.error('RefreshTokenHandler error:', error);
+        return res.status(500).json({ message: 'Internal server error', result: false });
+    }
+}
