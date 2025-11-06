@@ -1,26 +1,207 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id                 Int      @id @default(autoincrement())
-  email              String   @unique
+  id                 String             @id @default(cuid())
+  name               String
+  email              String             @unique
   password           String
-  name               String?
-  enrollment_no      String   @unique
-  notification_token String?
-  createdAt          DateTime @default(now())
+  role               Role               @default(STUDENT)
+  profilePic         String?
+  verificationStatus VerificationStatus @default(PENDING)
+  refreshToken       String?
+  notificationToken  String?
+
+  studentProfile   Student?
+  professorProfile Professor?
+  hodProfile       Hod?
+
+  createdRequests  VerificationRequest[] @relation("UserRequests")
+  approvedRequests VerificationRequest[] @relation("UserApprovals")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  enrollmentNo String   @unique
+  savedNotes   String[] @default([])
+
+  subjects String[] @default([])
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  semesterId String?
+  semester   Semester? @relation(fields: [semesterId], references: [id])
+
+  divisionId String?
+  division   Division? @relation(fields: [divisionId], references: [id])
+
+  studentSubjects StudentSubject[]
+}
+
+model Professor {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  teacherId    String      @unique
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  professorSubjects ProfessorSubject[]
+}
+
+model Hod {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id])
+  departmentId String     @unique
+  department   Department @relation(fields: [departmentId], references: [id])
+}
+
+model VerificationRequest {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation("UserRequests", fields: [userId], references: [id])
+
+  approvedById String?
+  approvedBy   User?   @relation("UserApprovals", fields: [approvedById], references: [id])
+
+  type        VerificationType
+  status      VerificationStatus @default(PENDING)
+  reason      String?
+  updatedData Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  STUDENT
+  PROFESSOR
+  HOD
+}
+
+enum VerificationType {
+  REGISTRATION
+  PROFILE_UPDATE
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Department {
+  id   String @id @default(cuid())
+  name String @unique
+  hod  Hod?
+
+  semesters  Semester[]
+  divisions  Division[]
+  professors Professor[]
+  students   Student[]
+  subject    Subject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Semester {
+  id     String @id @default(cuid())
+  number Int
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  divisions Division[]
+  subjects  Subject[]
+  students  Student[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Division {
+  id   String @id @default(cuid())
+  name String
+
+  semesterId   String
+  semester     Semester   @relation(fields: [semesterId], references: [id])
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  students Student[]
+  subjects Subject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([semesterId, departmentId])
+}
+
+model Subject {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  divisionId String
+  division   Division @relation(fields: [divisionId], references: [id])
+
+  semesterId String
+  semester   Semester @relation(fields: [semesterId], references: [id])
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  professorSubjects ProfessorSubject[]
+  studentSubjects   StudentSubject[]
+
+  @@index([divisionId, semesterId, departmentId])
+}
+
+model ProfessorSubject {
+  id          String    @id @default(cuid())
+  professorId String
+  subjectId   String
+  professor   Professor @relation(fields: [professorId], references: [id])
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  assignedAt  DateTime  @default(now())
+
+  @@unique([professorId, subjectId])
+  @@index([subjectId])
+}
+
+model StudentSubject {
+  id         String           @id @default(cuid())
+  studentId  String
+  subjectId  String
+  student    Student          @relation(fields: [studentId], references: [id])
+  subject    Subject          @relation(fields: [subjectId], references: [id])
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
+
+  @@unique([studentId, subjectId])
+  @@index([subjectId])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  DROPPED
+  COMPLETED
 }

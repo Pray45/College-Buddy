@@ -14,21 +14,6 @@ export default function App() {
   
   if (!isLoggedin) return <Redirect href="/(auth)/log-in" />;
 
-  const updates = [
-    {
-      title: "New Semester Begins",
-      description: "Welcome back! The new semester starts on September 1st. Check your schedule and get ready for exciting courses!"
-    },
-    {
-      title: "Campus Safety Measures",
-      description: "Please remember to follow the updated campus safety guidelines to ensure a safe environment for everyone."
-    },
-    {
-      title: "Library Renovation",
-      description: "The campus library is undergoing renovations to provide better study spaces and resources. Stay tuned for updates!"
-    },
-  ];
-
   const events = [
     {
       title: "Tech Fest \"Innovate 2024\"",
@@ -78,7 +63,7 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      <RecentUpdates updates={updates} />
+      <RecentUpdates/>
 
       <Quicklinks />
 

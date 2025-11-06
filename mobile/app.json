@@ -13,10 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -31,7 +28,6 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -50,7 +46,7 @@
       "eas": {
         "projectId": "2c0dec86-fbf6-46f8-ac0a-c084e9d68dfc"
       },
-      "apiBaseUrl": "http://10.237.71.138:3000/api"
+      "apiBaseUrl": "http://172.31.84.138:5000/api"
     },
     "owner": "pray45"
   }

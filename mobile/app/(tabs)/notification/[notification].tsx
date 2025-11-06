@@ -13,7 +13,9 @@ const Notification = () => {
 
 
     const goBack = useCallback(() => {
-        if (from) router.replace(from as Href);
+        if (from) {
+            router.replace(from as Href);
+        }
         else router.back();
     }, [from, router]);
 

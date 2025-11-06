@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/server.ts",
-    "prisma": "npx prisma db push && npx prisma generate"
+    "prisma": "npx prisma format &&  npx prisma validate && npx prisma migrate dev --name update-schema"
   },
   "author": "",
   "license": "ISC",

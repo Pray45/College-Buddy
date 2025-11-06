@@ -18,57 +18,72 @@ const Profile = () => {
   return (
     <ScrollView className='bg-primary h-full w-full'>
       <View className='px-6 pt-10'>
-        {/* Profile Header */}
+
+
         <View className='items-center mb-8'>
-          <View className='w-24 h-24 rounded-full bg-accent justify-center items-center mb-4'>
-            <Ionicons name="person" size={48} color="white" />
+          <View className='w-28 h-28 rounded-full bg-accent justify-center items-center mb-4'>
+            {userData?.name ? (
+              <Text className='text-white text-3xl font-bold'>
+                {userData.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+              </Text>
+            ) : (
+              <Ionicons name="person" size={48} color="white" />
+            )}
           </View>
           <Text className='text-white text-2xl font-bold'>
             {userData?.name || 'Student'}
           </Text>
-          <Text className='text-textSecondary text-sm mt-1'>
-            {userData?.email}
+          <Text className='text-textSecondary text-sm mt-1.5'>
+            {userData?.email || 'Not provided'}
           </Text>
         </View>
 
-        {/* Profile Information Cards */}
-        <View className='space-y-4'>
-          {/* Email Card */}
-          <View className='bg-secondary rounded-xl p-4 border border-textPrimary/20'>
-            <View className='flex-row items-center mb-2'>
-              <Ionicons name="mail-outline" size={20} color="#00FF88" />
-              <Text className='text-textPrimary text-sm font-semibold ml-2'>Email</Text>
-            </View>
-            <Text className='text-white text-base ml-7'>{userData?.email || 'N/A'}</Text>
+
+        <Text className='text-textPrimary text-2xl ml-1.5 font-bold'>Academic Details</Text>
+
+        <View className='bg-secondary rounded-xl p-6 mt-5'>
+
+          <View className='flex-row items-center mb-5'>
+            <Ionicons className='p-2.5 bg-accent rounded-xl' name="school-outline" size={22} color="white" />
+            <Text className='text-textSecondary ml-2'> Enrollment No: {userData?.enrollment_no || 'Not provided'}</Text>
           </View>
 
-          {/* Enrollment Card */}
-          {userData?.enrollment_no && (
-            <View className='bg-secondary rounded-xl p-4 border border-textPrimary/20'>
-              <View className='flex-row items-center mb-2'>
-                <Ionicons name="id-card-outline" size={20} color="#00FF88" />
-                <Text className='text-textPrimary text-sm font-semibold ml-2'>Enrollment Number</Text>
-              </View>
-              <Text className='text-white text-base ml-7'>{userData.enrollment_no}</Text>
-            </View>
-          )}
+          <View className="mx-5 border-b border-[#29313C]" />
 
-          {/* User ID Card */}
-          {userData?.id && (
-            <View className='bg-secondary rounded-xl p-4 border border-textPrimary/20'>
-              <View className='flex-row items-center mb-2'>
-                <Ionicons name="key-outline" size={20} color="#00FF88" />
-                <Text className='text-textPrimary text-sm font-semibold ml-2'>User ID</Text>
-              </View>
-              <Text className='text-white text-base ml-7'>{userData.id}</Text>
-            </View>
-          )}
+          <View className='flex-row items-center mb-5 mt-5'>
+            <Ionicons className='p-2.5 bg-accent rounded-xl' name="book-outline" size={22} color="white" />
+            <Text className='text-textSecondary ml-2'> Department: {userData?.department || 'Not provided'}</Text>
+          </View>
+
+          <View className="mx-5 border-b border-[#29313C]" />
+
+          <View className='flex-row items-center mb-5 mt-5'>
+            <Ionicons className='p-2.5 bg-accent rounded-xl' name="call-outline" size={22} color="white" />
+            <Text className='text-textSecondary ml-2'> Mobile No: {userData?.mobile_no || 'Not provided'}</Text>
+          </View>
+
+          <View className="mx-5 border-b border-[#29313C]" />
+
+          <View className='flex-row items-center mb-5 mt-5'>
+            <Ionicons className='p-2.5 bg-accent rounded-xl' name="person-outline" size={22} color="white" />
+            <Text className='text-textSecondary ml-2'> Role: {userData?.role || 'Not provided'}</Text>
+          </View>
+
         </View>
 
+
+
+        <Text className='text-textPrimary my-5 text-2xl ml-1.5 font-bold'>Attendance</Text>
+
+            
+            
+
+
+
         {/* Logout Button */}
-        <TouchableOpacity 
-          onPress={handleLogout} 
-          className='bg-red-500 mt-8 px-6 py-4 rounded-xl flex-row items-center justify-center'
+        <TouchableOpacity
+          onPress={handleLogout}
+          className='bg-red-500 mt-8 px-6 py-4 rounded-xl flex-row items-center mb-5 justify-center'
         >
           <Ionicons name="log-out-outline" size={24} color="white" />
           <Text className='text-white text-lg font-bold ml-2'>Log Out</Text>

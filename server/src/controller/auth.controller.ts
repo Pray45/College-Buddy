@@ -1,140 +1,251 @@
-import type { Request, Response } from 'express';
-import prisma from '../config/Prisma_connect';
-import bcrypt from 'bcrypt';
-import { SALT_ROUNDS } from '../config/constants';
-import { create_Access_Token, create_Refresh_Token, verifyRefreshToken } from '../utils/JWT';
+import { Request, Response } from "express"
+import { CreateError } from "../config/Error"
+import prisma from "../config/Prisma_connect";
+import { BcryptCheck, BcryptHash } from "../utils/bcrypt";
+import { Role, VerificationStatus, VerificationType } from "@prisma/client";
+import { CreateAccessToken, CreateRefreshToken, VerifyRefreshToken } from "../utils/JWT";
 
-export const RegisterHandler = async (req: Request, res: Response) => {
+export const RegistrationHandler = async (req: Request, res: Response) => {
     try {
-        const { email, password, enrollment_no, name } = (req.body ?? {}) as {
-            email?: string;
-            password?: string;
-            enrollment_no?: string;
-            name?: string;
-        };
 
-        if (!email || !password || !enrollment_no)
-            return res.status(400).json({ message: 'email, password and enrollment_no are required', result: false });
-
-        const existingByEmail = await prisma.user.findUnique({ where: { email } });
-        if (existingByEmail) return res.status(409).json({ message: 'Email already in use', result: false });
-
-        const existingByEnrollment = await prisma.user.findUnique({ where: { enrollment_no } });
-        if (existingByEnrollment) return res.status(409).json({ message: 'Enrollment number already in use', result: false });
-
-        const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-
-        const createData: any = { 
-            email, 
-            password: hashed, 
-            enrollment_no
-        };
-        if (name) createData.name = name;
-
-        const user = await prisma.user.create({ data: createData });
-
-        const accessToken = create_Access_Token({ userId: user.id });
-        const refreshToken = create_Refresh_Token({ userId: user.id });
-
-        const safeUser = {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            enrollment_no: user.enrollment_no,
-            createdAt: user.createdAt
-        };
-
-        return res.status(201).json({
-            message: 'User created successfully',
-            result: true,
-            user: safeUser,
-            accessToken,
-            refreshToken
-        });
-
-    } catch (error) {
-        console.error('RegisterHandler error:', error);
-        return res.status(500).json({ message: 'Internal server error', result: false });
-    }
-};
-
-
-export const LoginHandler = async (req: Request, res: Response) => {
-    try {
-        const { email, enrollment_no, password } = (req.body ?? {}) as {
-            email?: string;
-            enrollment_no?: string;
-            password?: string;
-        };
-
-        if (!password || (!email && !enrollment_no)) {
-            return res.status(400).json({ message: 'Provide password and either email or enrollment_no', result: false });
+        const { name, email, password, role, department, enrollmentNo, teacherId } = (req.body ?? {}) as {
+            name: string,
+            email: string,
+            password: string,
+            role: string,
+            department: string,
+            enrollmentNo: string,
+            teacherId: string,
         }
 
-        // Find by email or enrollment_no
-        const user = email
-            ? await prisma.user.findUnique({ where: { email } })
-            : await prisma.user.findUnique({ where: { enrollment_no } });
+        if (!name || !email || !password || !role || !department) {
+            CreateError(404, "invalid credentials", "Registration Handler");
+        }
 
-        if (!user) return res.status(401).json({ message: 'Invalid credentials', result: false });
+        if (role == "STUDENT") {
+            if (!enrollmentNo)
+                CreateError(404, "Enrollemt Number not found", "Registration Handler");
 
-        const passwordMatches = await bcrypt.compare(password, user.password);
-        if (!passwordMatches) return res.status(401).json({ message: 'Invalid credentials', result: false });
+            const isExistingenrollment = await prisma.student.findUnique({ where: { enrollmentNo } });
+            if (isExistingenrollment)
+                CreateError(409, "enrollment number is alreadiy in use", "registration Handler");
+        }
 
-        const accessToken = create_Access_Token({ userId: user.id });
-        const refreshToken = create_Refresh_Token({ userId: user.id });
+        if (role == "PROFESSOR") {
+            if (!teacherId)
+                CreateError(404, "Teacher Id not found", "Registration Handler");
 
-        const safeUser = {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            enrollment_no: user.enrollment_no,
-            createdAt: user.createdAt
-        };
+            const IsExistingTeacherId = await prisma.professor.findUnique({ where: { teacherId } })
+            if (IsExistingTeacherId)
+                CreateError(409, "TeacherId is already in use", "registration handler");
+        }
 
-        return res.status(200).json({
-            message: 'Login successful',
+        const isExisting = await prisma.user.findUnique({ where: { email } });
+        if (isExisting) {
+            CreateError(409, "User Already Exists", "Registration Handler");
+        }
+
+        const hashedPass = await BcryptHash(password);
+
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPass!,
+                role: role as Role,
+                verificationStatus: VerificationStatus.PENDING,
+                refreshToken: "",
+                notificationToken: "",
+            },
+        });
+
+        if (role == "STUDENT") {
+
+            const createStudent = {
+                userId: user.id,
+                enrollmentNo,
+                department
+            }
+            await prisma.student.create({ data: createStudent })
+
+        } else if (role == "PROFESSOR") {
+            const createProfessor = {
+                userId: user.id,
+                teacherId,
+                department
+            }
+            await prisma.professor.create({ data: createProfessor })
+        }
+
+        await prisma.verificationRequest.create({
+            data: {
+                userId: user.id,
+                type: VerificationType.REGISTRATION,
+                status: VerificationStatus.PENDING,
+                updatedData: user,
+                reason: "Registering User"
+            }
+        })
+
+        res.status(201).json({
             result: true,
-            user: safeUser,
-            accessToken,
-            refreshToken
+            message: "Registration Request sent Successfully",
+            data: { userData: user }
         });
 
     } catch (error) {
-        console.error('LoginHandler error:', error);
-        return res.status(500).json({ message: 'Internal server error', result: false });
+        console.log("Internal server error : ", error)
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in Registration Handler",
+            error
+        })
     }
-};
+}
 
 
+export const loginHandler = async (req: Request, res: Response) => {
 
-export const RefreshTokenHandler = async (req: Request, res: Response) => {
     try {
-        const { refreshToken } = req.body;
-        
+
+        const { role, email, password } = (req.body ?? {}) as {
+            role?: "STUDENT" | "PROFESSOR";
+            email?: string,
+            password?: string,
+        }
+
+        if (!email || !password || !role) {
+            CreateError(404, "invalid credentials", "login hnadler");
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            CreateError(404, "email not found", "login handler")
+        }
+
+        if (user?.verificationStatus != "APPROVED") {
+            CreateError(401, "Registration request is not approved", "login handler");
+        }
+
+        if (role != user?.role) {
+            CreateError(401, "Not authorized for this role", "login handler");
+        }
+
+        const isValid = await BcryptCheck(password, user?.password!)
+        if (!isValid) {
+            CreateError(400, "Password didn't match", "login handler");
+        }
+
+        const payload = { id: user?.id }
+        const accessToken = CreateAccessToken({ payload });
+        const refreshToken = CreateRefreshToken({ payload });
+
+        await prisma.user.update({ where: { id: user?.id }, data: { refreshToken } })
+        const loginUser = await prisma.user.findUnique({ where: { id: user?.id } })
+
+        res.status(200).json({
+            result: true,
+            message: "loggedin successfully",
+            data: { userData: loginUser, accessToken }
+        });
+
+
+    } catch (error) {
+        console.error("error in loggin in user");
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in loginHandler",
+            error
+        });
+    }
+
+}
+
+
+export const refreashTokenHandler = async (req: Request, res: Response) => {
+
+    try {
+
+        const { refreshToken } = req.body as { refreshToken?: string };
+
         if (!refreshToken) {
-            return res.status(401).json({ message: 'No refresh token provided', result: false });
+            CreateError(400, "token not found", "refresh tokern handler");
         }
 
-        const decoded = verifyRefreshToken(refreshToken);
-        
-        if (!decoded || !decoded.userId) {
-            return res.status(403).json({ message: 'Invalid or expired refresh token', result: false });
+
+        const decoded = VerifyRefreshToken(refreshToken!)
+
+        if (!decoded) {
+            CreateError(400, "token did not match", "refresh token handler");
         }
 
-        // Generate new tokens
-        const newAccessToken = create_Access_Token({ userId: decoded.userId });
-        const newRefreshToken = create_Refresh_Token({ userId: decoded.userId });
+        const user = await prisma.user.findUnique({ where: { id: decoded?.payload.id } });
+        if (!user)
+            CreateError(400, "couldnt extract user from refreshtoken", "refreshtoken handler");
 
-        return res.status(200).json({
-            message: 'Tokens refreshed successfully',
+        if (user?.refreshToken !== refreshToken) {
+            CreateError(403, "Refresh token does not match. Possible reuse detected.", "refreshTokenHandler");
+        }
+
+        const payload = { id: user?.id };
+        const newAccessToken = CreateAccessToken({ payload });
+        const newRefreshToken = CreateRefreshToken({ payload });
+
+        await prisma.user.update({
+            where: { id: user?.id },
+            data: { refreshToken: newRefreshToken },
+        });
+
+        res.status(200).json({
             result: true,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken
+            message: "Tokens refreshed successfully",
+            data: {
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+            },
+        });
+
+
+    } catch (error) {
+        console.error("error in refreshtoken handler");
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in refresh token handler",
+            error
+        });
+    }
+
+}
+
+
+export const getUserHandler = async (req: Request, res: Response) => {
+
+    try {
+
+        const { id } = req.body as { id?: string };
+
+        if (!id) {
+            CreateError(400, "didnt get user Id", "get user handler");
+        }
+
+        const user = await prisma.user.findUnique({ where: { id } });
+        if (!user) {
+            CreateError(400, "Coundlt find User from user id", "get user handler")
+        }
+
+        res.status(200).json({
+            result: true,
+            message: "successfully get user",
+            data: user
         });
 
     } catch (error) {
-        console.error('RefreshTokenHandler error:', error);
-        return res.status(500).json({ message: 'Internal server error', result: false });
+        console.error("error in getting user");
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in Getting user",
+            error
+        });
     }
+
 }

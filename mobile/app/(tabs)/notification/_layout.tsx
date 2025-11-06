@@ -1,9 +1,12 @@
 import React from 'react'
+import { View } from 'react-native'
 import { Stack } from 'expo-router'
 
 const _layout = () => {
     return (
-        <Stack screenOptions={{ headerShown: false }} />
+        <View className='bg-primary h-full w-full'>
+            <Stack screenOptions={{ headerShown: false }} />
+        </View>
     )
 }
 

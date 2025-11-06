@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.routes';
 import { env } from './config/env';
+import requestRouter from './routes/request.routes';
 
 const app: Application = express();
 const PORT = env.PORT || '3000';
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
+app.use('/api/requests', requestRouter);
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {

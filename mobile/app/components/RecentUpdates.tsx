@@ -1,9 +1,12 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { usePathname, useRouter } from 'expo-router';
+import useNotificationStore from '../store/notificationStore';
 
-const RecentUpdates = ({ updates }: { updates: { title: string; description: string }[] }) => {
+const RecentUpdates = () => {
 
+
+    const updates = useNotificationStore((state) => state.notifications);
     const router = useRouter();
     const currentPath = usePathname();
 
