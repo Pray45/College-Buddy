@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.routes';
 import { env } from './config/env';
 import requestRouter from './routes/request.routes';
+import divisionRouter from './routes/division.routes';
+import subjectRouter from './routes/subject.routes';
 
 const app: Application = express();
 const PORT = env.PORT || '3000';
@@ -27,6 +29,8 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
 app.use('/api/requests', requestRouter);
+app.use('/api/div', divisionRouter);
+app.use('/api/subject', subjectRouter);
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {

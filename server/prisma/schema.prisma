@@ -7,6 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  STUDENT
+  PROFESSOR
+  HOD
+}
+
+enum VerificationType {
+  REGISTRATION
+  PROFILE_UPDATE
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  DROPPED
+  COMPLETED
+}
+
 model User {
   id                 String             @id @default(cuid())
   name               String
@@ -29,48 +52,6 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model Student {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
-  enrollmentNo String   @unique
-  savedNotes   String[] @default([])
-
-  subjects String[] @default([])
-
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-
-  semesterId String?
-  semester   Semester? @relation(fields: [semesterId], references: [id])
-
-  divisionId String?
-  division   Division? @relation(fields: [divisionId], references: [id])
-
-  studentSubjects StudentSubject[]
-}
-
-model Professor {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
-  teacherId    String      @unique
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-
-  professorSubjects ProfessorSubject[]
-}
-
-model Hod {
-  id           String     @id @default(cuid())
-  userId       String     @unique
-  user         User       @relation(fields: [userId], references: [id])
-  departmentId String     @unique
-  department   Department @relation(fields: [departmentId], references: [id])
-}
-
 model VerificationRequest {
   id     String @id @default(cuid())
   userId String
@@ -88,22 +69,6 @@ model VerificationRequest {
   updatedAt DateTime @updatedAt
 }
 
-enum Role {
-  STUDENT
-  PROFESSOR
-  HOD
-}
-
-enum VerificationType {
-  REGISTRATION
-  PROFILE_UPDATE
-}
-
-enum VerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
 
 model Department {
   id   String @id @default(cuid())
@@ -114,16 +79,23 @@ model Department {
   divisions  Division[]
   professors Professor[]
   students   Student[]
-  subject    Subject[]
+  subjects   Subject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Semester {
-  id     String @id @default(cuid())
-  number Int
+model Hod {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id])
+  departmentId String     @unique
+  department   Department @relation(fields: [departmentId], references: [id])
+}
 
+model Semester {
+  id           String     @id @default(cuid())
+  number       Int
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id])
 
@@ -144,47 +116,88 @@ model Division {
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id])
 
-  students Student[]
-  subjects Subject[]
+  students     Student[]
+  subjectLinks DivisionSubjectAssignment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([semesterId, departmentId])
+  @@unique([name, semesterId, departmentId])
 }
 
 model Subject {
   id          String  @id @default(cuid())
-  name        String  @unique
+  name        String
+  code        String
   description String?
 
-  divisionId String
-  division   Division @relation(fields: [divisionId], references: [id])
+  semesterId   String
+  semester     Semester   @relation(fields: [semesterId], references: [id])
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
 
-  semesterId String
-  semester   Semester @relation(fields: [semesterId], references: [id])
+  divisionLinks DivisionSubjectAssignment[]
+  studentLinks  StudentSubject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, semesterId, departmentId])
+}
+
+model Professor {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  teacherId    String      @unique
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  teaches DivisionSubjectAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  enrollmentNo String   @unique
+  savedNotes   String[] @default([])
 
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id])
 
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  professorSubjects ProfessorSubject[]
-  studentSubjects   StudentSubject[]
+  semesterId String?
+  semester   Semester? @relation(fields: [semesterId], references: [id])
 
-  @@index([divisionId, semesterId, departmentId])
+  divisionId String?
+  division   Division? @relation(fields: [divisionId], references: [id])
+
+  enrollments StudentSubject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model ProfessorSubject {
-  id          String    @id @default(cuid())
-  professorId String
+model DivisionSubjectAssignment {
+  id          String  @id @default(cuid())
+  divisionId  String
   subjectId   String
-  professor   Professor @relation(fields: [professorId], references: [id])
-  subject     Subject   @relation(fields: [subjectId], references: [id])
-  assignedAt  DateTime  @default(now())
+  professorId String?
 
-  @@unique([professorId, subjectId])
-  @@index([subjectId])
+  division  Division   @relation(fields: [divisionId], references: [id])
+  subject   Subject    @relation(fields: [subjectId], references: [id])
+  professor Professor? @relation(fields: [professorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([divisionId, subjectId])
+  @@index([professorId])
 }
 
 model StudentSubject {
@@ -198,10 +211,4 @@ model StudentSubject {
 
   @@unique([studentId, subjectId])
   @@index([subjectId])
-}
-
-enum EnrollmentStatus {
-  ACTIVE
-  DROPPED
-  COMPLETED
 }

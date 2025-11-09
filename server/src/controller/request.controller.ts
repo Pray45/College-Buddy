@@ -40,7 +40,6 @@ export const getPendingRequestsHandler = async (req: Request, res: Response) => 
     }
 }
 
-
 export const createRequestHandler = async (req: Request, res: Response) => {
 
     try {
@@ -55,6 +54,14 @@ export const createRequestHandler = async (req: Request, res: Response) => {
         const approver = await prisma.user.findUnique({ where: { id: approverId } })
         if (!approver) {
             CreateError(404, "Approver not found in database", "create request handler");
+        }
+
+        if (approver?.verificationStatus !== "APPROVED") {
+            CreateError(404, "Approver is not Verified", "create request handler");
+        }
+
+        if (approver?.role !== "HOD" && "PROFESSOR") {
+            CreateError(400, "Approver is not Authorized", "create request handler");
         }
 
         const request = await prisma.verificationRequest.findUnique({ where: { id: requestId } })

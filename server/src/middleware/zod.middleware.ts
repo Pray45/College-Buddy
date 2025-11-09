@@ -1,11 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodSchema } from 'zod'
 
-/**
- * Validation middleware for request body using Zod schemas
- * - Returns a 400 with a compact `errors` array (path/message/code)
- * - Logs the full zod error.format() server-side for debugging
- */
 const validate = (schema: ZodSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const result = schema.safeParse(req.body);

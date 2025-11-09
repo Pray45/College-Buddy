@@ -8,18 +8,29 @@ import { CreateAccessToken, CreateRefreshToken, VerifyRefreshToken } from "../ut
 export const RegistrationHandler = async (req: Request, res: Response) => {
     try {
 
-        const { name, email, password, role, department, enrollmentNo, teacherId } = (req.body ?? {}) as {
+        const { name, email, password, role, departmentId, enrollmentNo, teacherId } = (req.body ?? {}) as {
             name: string,
             email: string,
             password: string,
-            role: string,
-            department: string,
+            role: Role,
+            departmentId: string,
             enrollmentNo: string,
             teacherId: string,
         }
 
-        if (!name || !email || !password || !role || !department) {
+        if (!name || !email || !password || !role || !departmentId) {
             CreateError(404, "invalid credentials", "Registration Handler");
+        }
+
+        const department = await prisma.department.findUnique({ where: { id: departmentId } });
+        if (!department) {
+            CreateError(404, "Department not found", "Registration Handler");
+        }
+
+        if (role == "HOD") {
+            const hodExists = await prisma.hod.findFirst({ where: { departmentId } });
+            if (hodExists)
+                CreateError(409, "Department already has a HOD", "Registration Handler");
         }
 
         if (role == "STUDENT") {
@@ -42,7 +53,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
 
         const isExisting = await prisma.user.findUnique({ where: { email } });
         if (isExisting) {
-            CreateError(409, "User Already Exists", "Registration Handler");
+            CreateError(409, "Email Already Exists", "Registration Handler");
         }
 
         const hashedPass = await BcryptHash(password);
@@ -53,9 +64,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
                 email,
                 password: hashedPass!,
                 role: role as Role,
-                verificationStatus: VerificationStatus.PENDING,
-                refreshToken: "",
-                notificationToken: "",
+                verificationStatus: VerificationStatus.PENDING
             },
         });
 
@@ -64,7 +73,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             const createStudent = {
                 userId: user.id,
                 enrollmentNo,
-                department
+                departmentId
             }
             await prisma.student.create({ data: createStudent })
 
@@ -72,10 +81,18 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             const createProfessor = {
                 userId: user.id,
                 teacherId,
-                department
+                departmentId
             }
             await prisma.professor.create({ data: createProfessor })
+
+        } else if (role == "HOD") {
+            const createHod = {
+                userId: user.id,
+                departmentId
+            }
+            await prisma.hod.create({ data: createHod });
         }
+
 
         await prisma.verificationRequest.create({
             data: {
@@ -109,7 +126,7 @@ export const loginHandler = async (req: Request, res: Response) => {
     try {
 
         const { role, email, password } = (req.body ?? {}) as {
-            role?: "STUDENT" | "PROFESSOR";
+            role?: Role
             email?: string,
             password?: string,
         }
@@ -121,6 +138,10 @@ export const loginHandler = async (req: Request, res: Response) => {
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
             CreateError(404, "email not found", "login handler")
+        }
+
+        if (role != user?.role) {
+            CreateError(401, "Not authorized for this role", "login handler");
         }
 
         if (user?.verificationStatus != "APPROVED") {
@@ -146,7 +167,7 @@ export const loginHandler = async (req: Request, res: Response) => {
         res.status(200).json({
             result: true,
             message: "loggedin successfully",
-            data: { userData: loginUser, accessToken }
+            data: { userData: loginUser, accessToken, refreshToken }
         });
 
 
@@ -183,9 +204,14 @@ export const refreashTokenHandler = async (req: Request, res: Response) => {
         if (!user)
             CreateError(400, "couldnt extract user from refreshtoken", "refreshtoken handler");
 
-        if (user?.refreshToken !== refreshToken) {
-            CreateError(403, "Refresh token does not match. Possible reuse detected.", "refreshTokenHandler");
+        if (!user?.refreshToken || user.refreshToken !== refreshToken) {
+            await prisma.user.update({
+                where: { id: user?.id },
+                data: { refreshToken: null },
+            });
+            CreateError(403, "Refresh token mismatch or reuse detected", "refreshTokenHandler");
         }
+
 
         const payload = { id: user?.id };
         const newAccessToken = CreateAccessToken({ payload });
