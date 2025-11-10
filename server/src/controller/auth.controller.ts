@@ -34,21 +34,25 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
         }
 
         if (role == "STUDENT") {
-            if (!enrollmentNo)
+            if (!enrollmentNo) {
                 CreateError(404, "Enrollemt Number not found", "Registration Handler");
+            }
 
             const isExistingenrollment = await prisma.student.findUnique({ where: { enrollmentNo } });
-            if (isExistingenrollment)
+            if (isExistingenrollment) {
                 CreateError(409, "enrollment number is alreadiy in use", "registration Handler");
+            }
         }
 
         if (role == "PROFESSOR") {
-            if (!teacherId)
+            if (!teacherId) {
                 CreateError(404, "Teacher Id not found", "Registration Handler");
+            }
 
             const IsExistingTeacherId = await prisma.professor.findUnique({ where: { teacherId } })
-            if (IsExistingTeacherId)
-                CreateError(409, "TeacherId is already in use", "registration handler");
+            if (IsExistingTeacherId) {
+                CreateError(409, "TeacherId is already in use", "registration handler")
+            }
         }
 
         const isExisting = await prisma.user.findUnique({ where: { email } });
@@ -118,7 +122,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             error
         })
     }
-}
+};
 
 
 export const loginHandler = async (req: Request, res: Response) => {
@@ -180,7 +184,7 @@ export const loginHandler = async (req: Request, res: Response) => {
         });
     }
 
-}
+};
 
 
 export const refreashTokenHandler = async (req: Request, res: Response) => {
@@ -241,7 +245,7 @@ export const refreashTokenHandler = async (req: Request, res: Response) => {
         });
     }
 
-}
+};
 
 
 export const getUserHandler = async (req: Request, res: Response) => {
@@ -274,4 +278,4 @@ export const getUserHandler = async (req: Request, res: Response) => {
         });
     }
 
-}
+};

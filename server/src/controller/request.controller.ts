@@ -38,7 +38,7 @@ export const getPendingRequestsHandler = async (req: Request, res: Response) => 
             error
         })
     }
-}
+};
 
 export const createRequestHandler = async (req: Request, res: Response) => {
 
@@ -131,4 +131,4 @@ export const createRequestHandler = async (req: Request, res: Response) => {
         });
     }
 
-}
+};

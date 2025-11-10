@@ -1,27 +1,60 @@
 import { Request, Response, NextFunction } from "express";
+import { JwtPayload } from "jsonwebtoken";
+import prisma from "../config/Prisma_connect";
+import { CreateError } from "../config/Error";
+import { Role } from "@prisma/client";
+import { VerifyAccessToken } from "../utils/JWT";
 
-export const requireRole = (...roles: string[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        try {
+export interface AuthenticatedRequest extends Request {
+    user?: {
+        id: string;
+        name: string;
+        email: string;
+        role: Role;
+    };
+}
 
-            const user = (req as any).user;
 
-            if (!roles.includes(user.role)) {
-                return res.status(403).json({
+export const requireRole =
+    (...allowedRoles: Role[]) =>
+        async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+            try {
+                const authHeader = req.headers.authorization;
+
+                if (!authHeader || !authHeader.startsWith("Bearer ")) {
+                    CreateError(401, "Authorization token missing", "requireRole");
+                }
+
+                const token = authHeader?.split(" ")[1];
+
+                const decoded = VerifyAccessToken(token!) as JwtPayload;
+                const userId = decoded?.payload?.id || decoded?.id;
+
+                if (!userId) {
+                    CreateError(401, "Invalid token payload", "requireRole");
+                }
+
+                const user = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { id: true, name: true, email: true, role: true },
+                });
+
+                if (!user) {
+                    CreateError(404, "User not found", "requireRole");
+                }
+
+                if (!allowedRoles.includes(user!.role)) {
+                    CreateError(403, `Access denied for role: ${user!.role}`, "requireRole");
+                }
+
+                req.user = user!;
+                next();
+            } catch (error: any) {
+                console.error("Role middleware error:", error);
+                res.status(error.statusCode || 401).json({
                     result: false,
-                    message: "Forbidden: insufficient permissions",
-                    allowedRoles: roles,
-                    userRole: user.role,
+                    message: "Unauthorized access",
+                    error
                 });
             }
-
-            next();
-        } catch (error) {
-            console.error("Error in requireRole middleware:", error);
-            return res.status(500).json({
-                result: false,
-                message: "Internal server error in role check",
-            });
-        }
-    };
-};
+        };

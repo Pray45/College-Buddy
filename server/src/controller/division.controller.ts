@@ -1,29 +1,29 @@
 import { Request, Response } from 'express';
 import { CreateError } from '../config/Error';
 import prisma from '../config/Prisma_connect';
-import { Role } from '@prisma/client';
 
 export const createDivisionHandler = async (req: Request, res: Response) => {
     try {
-        const { name, semesterId, departmentId, hodId } = req.body;
+        const { name, semesterId, departmentId } = req.body;
 
-        if (!name || !semesterId || !departmentId || !hodId)
-            throw CreateError(400, "Missing fields: name, semesterId, departmentId, hodId", "createDivisionHandler");
-
-        const hodUser = await prisma.hod.findUnique({ where: { id: hodId } });
-        if (!hodUser)
-            throw CreateError(403, "Only HODs can create divisions", "createDivisionHandler");
+        if (!name || !semesterId || !departmentId)
+            CreateError(400, "Missing fields: name, semesterId, departmentId, hodId", "createDivisionHandler");
 
         const department = await prisma.department.findUnique({ where: { id: departmentId } });
-        if (!department) throw CreateError(404, "Department not found", "createDivisionHandler");
+        if (!department) {
+            CreateError(404, "Department not found", "createDivisionHandler");
+        }
 
         const semester = await prisma.semester.findUnique({ where: { id: semesterId } });
-        if (!semester) throw CreateError(404, "Semester not found", "createDivisionHandler");
+        if (!semester) {
+            CreateError(404, "Semester not found", "createDivisionHandler");
+        }
 
 
         const existingDivision = await prisma.division.findFirst({ where: { name, semesterId } });
-        if (existingDivision)
-            throw CreateError(409, `Division '${name}' already exists for this semester`, "createDivisionHandler");
+        if (existingDivision) {
+            CreateError(409, `Division '${name}' already exists for this semester`, "createDivisionHandler");
+        }
 
         const division = await prisma.division.create({
             data: {
@@ -52,8 +52,9 @@ export const createDivisionHandler = async (req: Request, res: Response) => {
 export const getDivisionHandler = async (req: Request, res: Response) => {
     try {
         const { semesterId } = req.body;
-        if (!semesterId)
-            throw CreateError(400, "Semester ID missing", "getDivisions Handler");
+        if (!semesterId) {
+            CreateError(400, "Semester ID missing", "getDivisions Handler");
+        }
 
         const divisions = await prisma.division.findMany({
             where: { semesterId },
@@ -85,26 +86,24 @@ export const getDivisionHandler = async (req: Request, res: Response) => {
 
 export const assignStudentsHandler = async (req: Request, res: Response) => {
     try {
-        const { divisionId, studentIds, hodId } = req.body;
+        const { divisionId, studentIds } = req.body;
 
-        if (!divisionId || !studentIds?.length || !hodId)
+        if (!divisionId || !studentIds?.length)
             CreateError(400, "Missing fields: divisionId, studentIds, hodId", "assignStudentsToDivisionHandler");
 
-        const hodUser = await prisma.user.findUnique({ where: { id: hodId } });
-        if (!hodUser || hodUser.role !== Role.HOD)
-            CreateError(403, "Only HODs can assign students", "assignStudentsToDivisionHandler");
-
         const division = await prisma.division.findUnique({ where: { id: divisionId } });
-        if (!division)
+        if (!division) {
             CreateError(404, "Division not found", "assignStudentsToDivisionHandler");
+        }
 
         const students = await prisma.student.findMany({
             where: { id: { in: studentIds } },
             select: { id: true, divisionId: true, user: { select: { name: true } } },
         });
 
-        if (students.length !== studentIds.length)
+        if (students.length !== studentIds.length) {
             CreateError(400, "One or more student IDs are invalid", "assignStudentsToDivisionHandler");
+        }
 
         const alreadyAssigned = students.filter((s) => s.divisionId !== null);
         if (alreadyAssigned.length > 0) {
@@ -143,18 +142,15 @@ export const removeStudentHandler = async (req: Request, res: Response) => {
 
     try {
 
-        const { divisionId, studentIds, hodId } = req.body;
+        const { divisionId, studentIds } = req.body;
 
-        if (!divisionId || !studentIds?.length || !hodId)
+        if (!divisionId || !studentIds?.length)
             CreateError(400, "Missing fields: divisionId, studentIds, hodId", "remove Students from Division Handler");
 
-        const hodUser = await prisma.user.findUnique({ where: { id: hodId } });
-        if (!hodUser || hodUser.role !== Role.HOD)
-            CreateError(403, "Only HODs can assign students", "remove Students from Division Handler");
-
         const division = await prisma.division.findUnique({ where: { id: divisionId } });
-        if (!division)
+        if (!division) {
             CreateError(404, "Division not found", "remove Students from Division Handler");
+        }
 
         const students = await prisma.student.findMany({
             where: { id: { in: studentIds } },
@@ -164,8 +160,9 @@ export const removeStudentHandler = async (req: Request, res: Response) => {
             }
         });
 
-        if (students.length !== studentIds.length)
+        if (students.length !== studentIds.length) {
             CreateError(400, "One or more student IDs are invalid", "remove Students from Division Handler");
+        }
 
         const alreadyUnassigned = students.filter((s) => s.divisionId === null);
 
@@ -203,14 +200,15 @@ export const removeStudentHandler = async (req: Request, res: Response) => {
         });
     }
 
-}
+};
 
 
 export const getStudents = async (req: Request, res: Response) => {
     try {
         const { divisionId } = req.body;
-        if (!divisionId)
+        if (!divisionId) {
             CreateError(400, "Semester ID missing", "getstudent Handler");
+        }
 
         const students = await prisma.division.findUnique({
             where: { id: divisionId },

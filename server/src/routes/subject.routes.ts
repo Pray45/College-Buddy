@@ -1,9 +1,13 @@
 import express from 'express'
-import { createSubjectHandler, getSubjectHandler } from '../controller/subject.controller';
+import { createSubjectHandler, deleteSubjectHanlder, getSubjectByDeoartrmentHandler, getSubjectHandler } from '../controller/subject.controller';
+import { requireRole } from '../middleware/authorization.middleware';
+import { Role } from '@prisma/client';
 
 const subjectRouter = express.Router();
 
-subjectRouter.post('/create', createSubjectHandler);
-subjectRouter.get('/get', getSubjectHandler);
+subjectRouter.post('/create', requireRole(Role.HOD, Role.PROFESSOR), createSubjectHandler);
+subjectRouter.get('/get/sem', getSubjectHandler);
+subjectRouter.get('/get/dept', getSubjectByDeoartrmentHandler);
+subjectRouter.delete('/delete', requireRole(Role.HOD, Role.PROFESSOR), deleteSubjectHanlder);
 
-export default subjectRouter
+export default subjectRouter;

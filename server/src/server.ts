@@ -7,6 +7,8 @@ import { env } from './config/env';
 import requestRouter from './routes/request.routes';
 import divisionRouter from './routes/division.routes';
 import subjectRouter from './routes/subject.routes';
+import assignRoutrer from './routes/assignSubject.routes';
+import studentSubjectRouter from './routes/studentSubject.routes';
 
 const app: Application = express();
 const PORT = env.PORT || '3000';
@@ -31,6 +33,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/requests', requestRouter);
 app.use('/api/div', divisionRouter);
 app.use('/api/subject', subjectRouter);
+app.use('/api/assign-tchr', assignRoutrer);
+app.use('/api/assign-stu', studentSubjectRouter);
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {

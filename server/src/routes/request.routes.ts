@@ -1,9 +1,11 @@
 import express, { Router } from "express";
 import { createRequestHandler, getPendingRequestsHandler } from "../controller/request.controller";
+import { requireRole } from "../middleware/authorization.middleware";
+import { Role } from "@prisma/client";
 
 const requestRouter: Router = express.Router();
 
-requestRouter.get("/pending", getPendingRequestsHandler);
-requestRouter.post("/createreq", createRequestHandler);
+requestRouter.get("/pending", requireRole(Role.HOD, Role.PROFESSOR), getPendingRequestsHandler);
+requestRouter.post("/createreq", requireRole(Role.HOD, Role.PROFESSOR), createRequestHandler);
 
 export default requestRouter;
