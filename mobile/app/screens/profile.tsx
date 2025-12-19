@@ -45,22 +45,18 @@ const Profile = () => {
 
           <View className='flex-row items-center mb-5'>
             <Ionicons className='p-2.5 bg-accent rounded-xl' name="school-outline" size={22} color="white" />
-            <Text className='text-textSecondary ml-2'> Enrollment No: {userData?.enrollment_no || 'Not provided'}</Text>
+            <Text className='text-textSecondary ml-2'> Enrollment No: {userData?.enrollmentNo ?? 'Not provided'}</Text>
           </View>
 
           <View className="mx-5 border-b border-[#29313C]" />
 
           <View className='flex-row items-center mb-5 mt-5'>
             <Ionicons className='p-2.5 bg-accent rounded-xl' name="book-outline" size={22} color="white" />
-            <Text className='text-textSecondary ml-2'> Department: {userData?.department || 'Not provided'}</Text>
+            <Text className='text-textSecondary ml-2'> Department: {(userData as any)?.departmentId ?? 'Not provided'}</Text>
           </View>
 
           <View className="mx-5 border-b border-[#29313C]" />
 
-          <View className='flex-row items-center mb-5 mt-5'>
-            <Ionicons className='p-2.5 bg-accent rounded-xl' name="call-outline" size={22} color="white" />
-            <Text className='text-textSecondary ml-2'> Mobile No: {userData?.mobile_no || 'Not provided'}</Text>
-          </View>
 
           <View className="mx-5 border-b border-[#29313C]" />
 

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { CreateError } from '../config/Error'
-import prisma from '../config/Prisma_connect'
+import {prisma} from '../config/database'
 import { EnrollmentStatus } from '@prisma/client'
 
 export const enrollStudentsHandler = async (req: Request, res: Response) => {

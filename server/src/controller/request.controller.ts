@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../config/Prisma_connect"
+import {prisma} from "../config/database"
 import { CreateError } from "../config/Error";
 import { VerificationStatus } from "@prisma/client";
 import { CreateAccessToken, CreateRefreshToken } from "../utils/JWT";

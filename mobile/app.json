@@ -46,7 +46,7 @@
       "eas": {
         "projectId": "2c0dec86-fbf6-46f8-ac0a-c084e9d68dfc"
       },
-      "apiBaseUrl": "http://172.31.84.138:5000/api"
+      "apiBaseUrl": "http://10.248.35.138:5000/api"
     },
     "owner": "pray45"
   }

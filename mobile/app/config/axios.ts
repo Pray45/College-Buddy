@@ -2,7 +2,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://172.28.160.138:5000/api",
 });
 
 let isRefreshing = false;
@@ -49,7 +49,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = await SecureStore.getItemAsync("refreshToken");
         const { data } = await axios.post(
-          "http://localhost:5000/api/auth/refresh",
+          "http://172.28.160.138:5000/api/auth/refresh",
           { refreshToken }
         );
 

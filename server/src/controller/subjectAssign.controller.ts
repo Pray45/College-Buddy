@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { CreateError } from "../config/Error"
-import prisma from "../config/Prisma_connect"
+import {prisma} from "../config/database"
 
 
 export const assignTeacherHandler = async (req: Request, res: Response) => {
@@ -44,10 +44,10 @@ export const assignTeacherHandler = async (req: Request, res: Response) => {
                 professorId: professor?.id,
             },
             include: {
-                subject: { select: { name: true, code: true } },
-                professor: {
+                Subject: { select: { name: true, code: true } },
+                Professor: {
                     include: {
-                        user: { select: { name: true, email: true } },
+                        User: { select: { name: true, email: true } },
                     },
                 },
             },

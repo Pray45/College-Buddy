@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { CreateError } from '../config/Error';
-import prisma from '../config/Prisma_connect';
+import {prisma} from "../config/database"
 
 
 export const createSubjectHandler = async (req: Request, res: Response) => {

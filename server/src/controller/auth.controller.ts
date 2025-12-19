@@ -1,9 +1,9 @@
 import { Request, Response } from "express"
 import { CreateError } from "../config/Error"
-import prisma from "../config/Prisma_connect";
 import { BcryptCheck, BcryptHash } from "../utils/bcrypt";
-import { Role, VerificationStatus, VerificationType } from "@prisma/client";
+import { Role, VerificationStatus, VerificationType } from "@prisma/client"
 import { CreateAccessToken, CreateRefreshToken, VerifyRefreshToken } from "../utils/JWT";
+import {prisma} from "../config/database";
 
 export const RegistrationHandler = async (req: Request, res: Response) => {
     try {
@@ -27,13 +27,13 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             CreateError(404, "Department not found", "Registration Handler");
         }
 
-        if (role == "HOD") {
+        if (role == Role.HOD) {
             const hodExists = await prisma.hod.findFirst({ where: { departmentId } });
             if (hodExists)
                 CreateError(409, "Department already has a HOD", "Registration Handler");
         }
 
-        if (role == "STUDENT") {
+        if (role == Role.STUDENT) {
             if (!enrollmentNo) {
                 CreateError(404, "Enrollemt Number not found", "Registration Handler");
             }
@@ -44,7 +44,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             }
         }
 
-        if (role == "PROFESSOR") {
+        if (role == Role.PROFESSOR) {
             if (!teacherId) {
                 CreateError(404, "Teacher Id not found", "Registration Handler");
             }
@@ -72,7 +72,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             },
         });
 
-        if (role == "STUDENT") {
+        if (role == Role.STUDENT) {
 
             const createStudent = {
                 userId: user.id,
@@ -81,7 +81,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             }
             await prisma.student.create({ data: createStudent })
 
-        } else if (role == "PROFESSOR") {
+        } else if (role == Role.PROFESSOR) {
             const createProfessor = {
                 userId: user.id,
                 teacherId,
@@ -89,7 +89,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             }
             await prisma.professor.create({ data: createProfessor })
 
-        } else if (role == "HOD") {
+        } else if (role == Role.HOD) {
             const createHod = {
                 userId: user.id,
                 departmentId
@@ -166,12 +166,40 @@ export const loginHandler = async (req: Request, res: Response) => {
         const refreshToken = CreateRefreshToken({ payload });
 
         await prisma.user.update({ where: { id: user?.id }, data: { refreshToken } })
-        const loginUser = await prisma.user.findUnique({ where: { id: user?.id } })
+
+        let userData: any = await prisma.user.findUnique({
+            where: { id: user?.id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                profilePic: true,
+                verificationStatus: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+
+        if (user?.role === "STUDENT") {
+            const studentProfile = await prisma.student.findUnique({ where: { userId: user.id } });
+            userData = { ...userData, studentProfile };
+        }
+
+        if (user?.role === "PROFESSOR") {
+            const professorProfile = await prisma.professor.findUnique({ where: { userId: user.id } });
+            userData = { ...userData, professorProfile };
+        }
+
+        if (user?.role === "HOD") {
+            const hodProfile = await prisma.hod.findUnique({ where: { userId: user.id } });
+            userData = { ...userData, hodProfile };
+        }
 
         res.status(200).json({
             result: true,
             message: "loggedin successfully",
-            data: { userData: loginUser, accessToken, refreshToken }
+            data: { userData: userData, accessToken, refreshToken }
         });
 
 

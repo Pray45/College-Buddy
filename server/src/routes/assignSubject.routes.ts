@@ -6,7 +6,7 @@ import { Role } from '@prisma/client';
 const assignRoutrer: Router = express.Router();
 
 assignRoutrer.post('/create',  assignTeacherHandler);
-assignRoutrer.get('/get', getAssignedHandler)
+assignRoutrer.get('/get/div', getAssignedHandler)
 assignRoutrer.delete('/delete', requireRole(Role.HOD, Role.PROFESSOR), deleteAssignedHanlder);
 
 export default assignRoutrer

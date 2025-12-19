@@ -11,7 +11,7 @@ const Login = () => {
     const loading = useAuthStore((state: any) => state.loading);
 
     const [email, setEmail] = useState('');
-    const [enrollment, setEnrollment] = useState('');
+    const [role, setRole] = useState('STUDENT');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
@@ -20,13 +20,13 @@ const Login = () => {
     const onSubmit = async () => {
         setError(null);
         
-        if (!password || (!email && !enrollment)) {
+        if (!password || !email) {
             setError('Please enter password and either email or enrollment number');
             return;
         }
 
         try {
-            await login(email, enrollment, password);
+            await login(email, password, role);
         } catch (e: any) {
             setError(e?.message || 'Login failed');
         }
@@ -63,11 +63,21 @@ const Login = () => {
                         <Text className="text-sm text-black font-bold mb-2">Email address</Text>
                         <TextInput value={email} onChangeText={setEmail} placeholder="example@gmail.com" keyboardType="email-address" autoCapitalize="none" className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
 
-                        <Text className="text-sm text-black font-bold mb-2">Enrollment Number</Text>
-                        <TextInput value={enrollment} onChangeText={setEnrollment} placeholder="123456" keyboardType="number-pad" className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
-
                         <Text className="text-sm text-black font-bold mb-2">Password</Text>
                         <TextInput value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
+
+                        <Text className="text-sm text-black font-bold mb-2">Role</Text>
+                        <View className="flex-row mb-4">
+                            <TouchableOpacity onPress={() => setRole('STUDENT')} className={`flex-1 h-10 rounded-md items-center justify-center mr-2 ${role === 'STUDENT' ? 'bg-textPrimary' : 'bg-[#F3F4F6]'}`}>
+                                <Text className={`${role === 'STUDENT' ? 'text-primary font-bold' : 'text-textSecondary'}`}>STUDENT</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setRole('HOD')} className={`flex-1 h-10 rounded-md items-center justify-center mr-2 ${role === 'HOD' ? 'bg-textPrimary' : 'bg-[#F3F4F6]'}`}>
+                                <Text className={`${role === 'HOD' ? 'text-primary font-bold' : 'text-textSecondary'}`}>HOD</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setRole('PROFESSOR')} className={`flex-1 h-10 rounded-md items-center justify-center ${role === 'PROFESSOR' ? 'bg-textPrimary' : 'bg-[#F3F4F6]'}`}>
+                                <Text className={`${role === 'PROFESSOR' ? 'text-primary font-bold' : 'text-textSecondary'}`}>PROFESSOR</Text>
+                            </TouchableOpacity>
+                        </View>
 
                         {error && <Text className="text-red-500 mb-2">{error}</Text>}
 

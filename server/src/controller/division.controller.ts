@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { CreateError } from '../config/Error';
-import prisma from '../config/Prisma_connect';
+import {prisma} from '../config/database';
 
 export const createDivisionHandler = async (req: Request, res: Response) => {
     try {
@@ -28,8 +28,13 @@ export const createDivisionHandler = async (req: Request, res: Response) => {
         const division = await prisma.division.create({
             data: {
                 name,
-                semesterId,
-                departmentId,
+                department: {
+                    connect: { id: departmentId }
+                },
+                Semester: {
+                    connect: { id: semesterId }
+                },
+                updatedAt: new Date(),
             },
         });
 
@@ -59,9 +64,9 @@ export const getDivisionHandler = async (req: Request, res: Response) => {
         const divisions = await prisma.division.findMany({
             where: { semesterId },
             include: {
-                students: {
+                Student: {
                     include: {
-                        user: { select: { id: true, name: true, email: true } },
+                        User: { select: { id: true, name: true, email: true } },
                     },
                 },
             },
@@ -98,7 +103,7 @@ export const assignStudentsHandler = async (req: Request, res: Response) => {
 
         const students = await prisma.student.findMany({
             where: { id: { in: studentIds } },
-            select: { id: true, divisionId: true, user: { select: { name: true } } },
+            select: { id: true, divisionId: true, User: { select: { name: true } } },
         });
 
         if (students.length !== studentIds.length) {
@@ -107,7 +112,7 @@ export const assignStudentsHandler = async (req: Request, res: Response) => {
 
         const alreadyAssigned = students.filter((s) => s.divisionId !== null);
         if (alreadyAssigned.length > 0) {
-            const names = alreadyAssigned.map((s) => s.user.name).join(", ");
+            const names = alreadyAssigned.map((s) => s.User.name).join(", ");
             CreateError(
                 409,
                 `These students are already in a division: ${names}`,
@@ -156,7 +161,7 @@ export const removeStudentHandler = async (req: Request, res: Response) => {
             where: { id: { in: studentIds } },
             select: {
                 id: true, divisionId: true,
-                user: { select: { name: true } }
+                User: { select: { name: true } }
             }
         });
 
@@ -167,7 +172,7 @@ export const removeStudentHandler = async (req: Request, res: Response) => {
         const alreadyUnassigned = students.filter((s) => s.divisionId === null);
 
         if (alreadyUnassigned.length > 0) {
-            const names = alreadyUnassigned.map((s) => s.user.name).join(", ");
+            const names = alreadyUnassigned.map((s) => s.User.name).join(", ");
             CreateError(
                 409,
                 `These students are dont havea division: ${names}`,
@@ -213,9 +218,9 @@ export const getStudents = async (req: Request, res: Response) => {
         const students = await prisma.division.findUnique({
             where: { id: divisionId },
             include: {
-                students: {
+                Student: {
                     include: {
-                        user: { select: { id: true, name: true, email: true } }
+                        User: { select: { id: true, name: true, email: true } }
                     }
                 }
             }
