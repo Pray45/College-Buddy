@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router';
-import useAuthStore from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
 import { Ionicons } from '@expo/vector-icons';
 
 const Profile = () => {

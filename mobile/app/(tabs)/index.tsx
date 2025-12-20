@@ -5,7 +5,7 @@ import Quicklinks from "../components/Quicklinks";
 import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 import UpcomingEvents from "../components/UpcomingEvents";
 import { Redirect, useRouter } from "expo-router";
-import useAuthStore from "../store/authStore";
+import { useAuthStore } from "../store/authStore";
 
 export default function App() {
 

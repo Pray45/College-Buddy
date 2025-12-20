@@ -2,7 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'reac
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState } from 'react'
 import { Redirect, useRouter } from 'expo-router';
-import useAuthStore from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
 
 const Login = () => {
     const router = useRouter();

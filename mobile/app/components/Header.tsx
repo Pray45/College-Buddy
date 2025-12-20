@@ -1,13 +1,13 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import useAuthStore from "../store/authStore";
+import { useAuthStore } from "../store/authStore";
 import { useRouter } from "expo-router";
 
 
 export default function CustomHeader() {
 
     const router = useRouter();
-    const isLoggedin = useAuthStore((state) => state.isLoggedin);
+    const login = useAuthStore((state) => state.loggedIn);
 
     return (
         <>
@@ -19,7 +19,7 @@ export default function CustomHeader() {
                 </TouchableOpacity>
 
                 {
-                    isLoggedin && (
+                    login && (
 
                         <TouchableOpacity onPress={() => router.push("../screens/profile")} className="w-12 h-12 rounded-full bg-accent justify-center items-center">
                             <Ionicons name="person" size={24} color="white" />

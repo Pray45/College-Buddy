@@ -3,7 +3,7 @@ import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState, useCallback } from 'react';
 import { Redirect, useRouter } from 'expo-router';
-import useAuthStore from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
 
 // Types
 type Role = 'STUDENT' | 'PROFESSOR';
@@ -102,10 +102,10 @@ const Register = () => {
         name.trim(),
         email.trim().toLowerCase(),
         password,
+        role,
         role === 'STUDENT' ? enrollment.trim() : undefined,
         role === 'PROFESSOR' ? teacherId.trim() : undefined,
-        department,
-        role
+        department
       );
     } catch (e: any) {
       Alert.alert(
@@ -200,7 +200,7 @@ const Register = () => {
             {/* Department Picker */}
             <Text className="text-sm text-black mb-2 font-bold">Department</Text>
             <View className="bg-[#F3F4F6] rounded-md mb-4">
-              <Picker selectedValue={department} onValueChange={(value) => setDepartment(value as Department)}>
+              <Picker selectedValue={department} onValueChange={(value:any) => setDepartment(value as Department)}>
                 {DEPARTMENTS.map((dept) => (
                   <Picker.Item key={dept.value} label={dept.label} value={dept.value} />
                 ))}
