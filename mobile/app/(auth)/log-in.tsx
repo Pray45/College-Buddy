@@ -3,6 +3,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import React, { useState } from 'react'
 import { Redirect, useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
+import ErrorBanner from '../components/ErrorBanner';
+import { extractErrorMessage } from '../../src/utils/extractErrorMessage';
 
 const Login = () => {
     const router = useRouter();
@@ -21,14 +23,15 @@ const Login = () => {
         setError(null);
 
         if (!password || !email) {
-            setError('Please enter password and either email or enrollment number');
+            setError('Please enter your email and password');
             return;
         }
 
         try {
             await login({ email, password, role });
         } catch (e: any) {
-            setError(e?.message || 'Login failed');
+            const parsed = extractErrorMessage(e);
+            setError(parsed);
         }
     }
 
@@ -79,7 +82,7 @@ const Login = () => {
                             </TouchableOpacity>
                         </View>
 
-                        {error && <Text className="text-red-500 mb-2">{error}</Text>}
+                        <ErrorBanner message={error} onClose={() => setError(null)} />
 
                         <TouchableOpacity onPress={onSubmit} className="bg-textPrimary h-12 rounded-full items-center justify-center mt-4">
                             {loading ? (

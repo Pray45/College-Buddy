@@ -1,9 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState, useCallback } from 'react';
 import { Redirect, useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
+import ErrorBanner from '../components/ErrorBanner';
+import { extractErrorMessage } from '../../src/utils/extractErrorMessage';
 
 type Role = 'STUDENT' | 'PROFESSOR';
 type Department = 'CSE' | 'ECE' | 'ME' | 'EE' | 'CE';
@@ -42,6 +44,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const isTwelveDigits = (val: string) => /^\d{12}$/.test(val);
 
@@ -109,6 +112,7 @@ const Register = () => {
     }
 
     try {
+      setServerError(null);
       await register({
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -119,11 +123,8 @@ const Register = () => {
         teacherId: role === 'PROFESSOR' ? teacherId.trim() : undefined,
       });
     } catch (e: any) {
-      Alert.alert(
-        'Registration Failed',
-        e?.message || 'An error occurred during registration. Please try again.',
-        [{ text: 'OK' }]
-      );
+      const message = extractErrorMessage(e);
+      setServerError(message);
     }
   };
 
@@ -167,6 +168,7 @@ const Register = () => {
           </View>
 
           <View className="mt-6">
+            <ErrorBanner message={serverError} onClose={() => setServerError(null)} />
             {/* Role Picker */}
             <Text className="text-sm text-black mb-2 font-bold">Role</Text>
             <View className="bg-[#F3F4F6] rounded-md mb-4">

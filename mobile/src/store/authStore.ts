@@ -2,6 +2,7 @@ import { create } from "zustand";
 import * as SecureStore from 'expo-secure-store';
 import api from "../config/axios";
 import { jwtDecode } from "jwt-decode";
+import { extractErrorMessage } from "../utils/extractErrorMessage";
 
 type Role = "STUDENT" | "PROFESSOR" | "HOD";
 type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -76,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
             const { name, email, password, role, department, enrollmentNo, teacherId } = data;
 
             try {
-                set({ loading: true });
+                set({ loading: true, error: null });
 
                 const response = await api.post('/auth/register', {
                     name,
@@ -91,12 +92,14 @@ export const useAuthStore = create<AuthState>()(
                 if (response.data.result === true) {
                     set({ loggedIn: true });
                     return response.data;
-                } else {
-                    throw new Error(response.data.message || "Registration failed");
                 }
+
+                const fallback = response.data.message || "Registration failed";
+                throw new Error(fallback);
+
             } catch (error: any) {
-                const message = error.response?.data?.message || error.message || "Registration failed";
-                console.error("Registration error:", message);
+                const message = extractErrorMessage(error);
+                set({ error: message });
                 throw new Error(message);
             } finally {
                 set({ loading: false });
@@ -127,8 +130,9 @@ export const useAuthStore = create<AuthState>()(
                 set({ isprofileComplete: isComplete });
 
             } catch (err: any) {
-                set({ error: err?.response?.data?.message || "Login failed" });
-                throw err;
+                const message = extractErrorMessage(err);
+                set({ error: message });
+                throw new Error(message);
             } finally {
                 set({ loading: false });
             }
