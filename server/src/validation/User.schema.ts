@@ -6,7 +6,7 @@ export const registerSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["STUDENT", "PROFESSOR", "HOD"]),
-    departmentId: z.string().trim().min(1, "Department cannot be empty"),
+    department: z.string().trim().min(1, "Department cannot be empty"),
     enrollmentNo: z.string().length(12, "Enrollment number must be exactly 12 digits").optional(),
     teacherId: z.string().length(12, "Teacher ID must be exactly 12 digits").optional()
 }).refine((data) => {

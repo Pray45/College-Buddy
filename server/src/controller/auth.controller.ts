@@ -8,24 +8,26 @@ import {prisma} from "../config/database";
 export const RegistrationHandler = async (req: Request, res: Response) => {
     try {
 
-        const { name, email, password, role, departmentId, enrollmentNo, teacherId } = (req.body ?? {}) as {
+        const { name, email, password, role, department, enrollmentNo, teacherId } = (req.body ?? {}) as {
             name: string,
             email: string,
             password: string,
             role: Role,
-            departmentId: string,
+            department: string,
             enrollmentNo: string,
             teacherId: string,
         }
 
-        if (!name || !email || !password || !role || !departmentId) {
+        if (!name || !email || !password || !role || !department) {
             CreateError(404, "invalid credentials", "Registration Handler");
         }
 
-        const department = await prisma.department.findUnique({ where: { id: departmentId } });
-        if (!department) {
+        const departmentRecord = await prisma.department.findUnique({ where: { name: department } });
+        if (!departmentRecord) {
             CreateError(404, "Department not found", "Registration Handler");
         }
+
+            const departmentId = departmentRecord!.id;
 
         if (role == Role.HOD) {
             const hodExists = await prisma.hod.findFirst({ where: { departmentId } });

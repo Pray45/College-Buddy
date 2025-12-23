@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../../src/store/authStore";
 import { useRouter } from "expo-router";
 
 

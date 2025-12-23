@@ -1,9 +1,14 @@
 import React from 'react'
-import { Tabs, useRouter } from 'expo-router'
+import { Redirect, Tabs, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { useAuthStore } from '../../src/store/authStore';
 
 const TabsLayout = () => {
+
   const router = useRouter();
+  const loggedIn = useAuthStore((state) => state.loggedIn);
+  if (!loggedIn) return <Redirect href="/(auth)/log-in" />;
+
   return (
     <Tabs screenOptions={{
       tabBarStyle: {

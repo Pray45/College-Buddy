@@ -3,9 +3,8 @@ import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState, useCallback } from 'react';
 import { Redirect, useRouter } from 'expo-router';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../src/store/authStore';
 
-// Types
 type Role = 'STUDENT' | 'PROFESSOR';
 type Department = 'CSE' | 'ECE' | 'ME' | 'EE' | 'CE';
 
@@ -29,7 +28,7 @@ const DEPARTMENTS = [
 
 const Register = () => {
   const router = useRouter();
-  const isLoggedin = useAuthStore((state: any) => state.isLoggedin);
+  const loggedIn = useAuthStore((state: any) => state.loggedIn);
   const register = useAuthStore((state: any) => state.register);
   const loading = useAuthStore((state: any) => state.loading);
 
@@ -43,6 +42,8 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
+
+  const isTwelveDigits = (val: string) => /^\d{12}$/.test(val);
 
   // Validation functions
   const validateEmail = (email: string): boolean => {
@@ -77,12 +78,22 @@ const Register = () => {
       newErrors.confirm = 'Passwords do not match';
     }
 
-    if (role === 'STUDENT' && !enrollment.trim()) {
-      newErrors.enrollment = 'Enrollment number is required';
+    if (role === 'STUDENT') {
+      const value = enrollment.trim();
+      if (!value) {
+        newErrors.enrollment = 'Enrollment number is required';
+      } else if (!isTwelveDigits(value)) {
+        newErrors.enrollment = 'Enrollment number must be exactly 12 digits';
+      }
     }
 
-    if (role === 'PROFESSOR' && !teacherId.trim()) {
-      newErrors.teacherId = 'Teacher ID is required';
+    if (role === 'PROFESSOR') {
+      const value = teacherId.trim();
+      if (!value) {
+        newErrors.teacherId = 'Teacher ID is required';
+      } else if (!isTwelveDigits(value)) {
+        newErrors.teacherId = 'Teacher ID must be exactly 12 digits';
+      }
     }
 
     setErrors(newErrors);
@@ -90,7 +101,7 @@ const Register = () => {
   }, [name, email, password, confirm, role, enrollment, teacherId]);
 
   // Early return after all hooks
-  if (isLoggedin) return <Redirect href="/(tabs)" />;
+  if (loggedIn) return <Redirect href="/(tabs)" />;
 
   const onRegister = async () => {
     if (!validateForm()) {
@@ -98,15 +109,15 @@ const Register = () => {
     }
 
     try {
-      await register(
-        name.trim(),
-        email.trim().toLowerCase(),
+      await register({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         password,
         role,
-        role === 'STUDENT' ? enrollment.trim() : undefined,
-        role === 'PROFESSOR' ? teacherId.trim() : undefined,
-        department
-      );
+        department,
+        enrollmentNo: role === 'STUDENT' ? enrollment.trim() : undefined,
+        teacherId: role === 'PROFESSOR' ? teacherId.trim() : undefined,
+      });
     } catch (e: any) {
       Alert.alert(
         'Registration Failed',

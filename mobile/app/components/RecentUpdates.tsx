@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { usePathname, useRouter } from 'expo-router';
-import useNotificationStore from '../store/notificationStore';
+import useNotificationStore from '../../src/store/notificationStore';
 
 const RecentUpdates = () => {
 

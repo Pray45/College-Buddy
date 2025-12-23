@@ -10,6 +10,7 @@ import divisionRouter from './routes/division.routes';
 import subjectRouter from './routes/subject.routes';
 import assignRoutrer from './routes/assignSubject.routes';
 import studentSubjectRouter from './routes/studentSubject.routes';
+import { connectDB } from './config/database';
 
 const app: Application = express();
 const PORT = env.PORT || '3000';
@@ -42,7 +43,13 @@ app.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok', message: 'Server is running' });
 });
 
-app.listen(PORT, () => {
-    console.log(` Server is running on port ${PORT}`);
-    console.log(` Environment: ${env.NODE_ENV}`);
-});
+async function start() {
+    await connectDB();
+    
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log(`Environment: ${env.NODE_ENV}`);
+    });
+}
+
+start();

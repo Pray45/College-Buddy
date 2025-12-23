@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware"
 import * as SecureStore from 'expo-secure-store';
 import api from "../config/axios";
 import { jwtDecode } from "jwt-decode";

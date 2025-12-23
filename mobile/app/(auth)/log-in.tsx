@@ -2,11 +2,11 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'reac
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState } from 'react'
 import { Redirect, useRouter } from 'expo-router';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../src/store/authStore';
 
 const Login = () => {
     const router = useRouter();
-    const isLoggedin = useAuthStore((state: any) => state.isLoggedin);
+    const loggedIn = useAuthStore((state: any) => state.loggedIn);
     const login = useAuthStore((state: any) => state.login);
     const loading = useAuthStore((state: any) => state.loading);
 
@@ -15,18 +15,18 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-    if (isLoggedin) return <Redirect href="/(tabs)" />;
+    if (loggedIn) return <Redirect href="/(tabs)" />;
 
     const onSubmit = async () => {
         setError(null);
-        
+
         if (!password || !email) {
             setError('Please enter password and either email or enrollment number');
             return;
         }
 
         try {
-            await login(email, password, role);
+            await login({ email, password, role });
         } catch (e: any) {
             setError(e?.message || 'Login failed');
         }
