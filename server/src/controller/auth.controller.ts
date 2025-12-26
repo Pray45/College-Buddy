@@ -3,7 +3,7 @@ import { CreateError } from "../config/Error"
 import { BcryptCheck, BcryptHash } from "../utils/bcrypt";
 import { Role, VerificationStatus, VerificationType } from "@prisma/client"
 import { CreateAccessToken, CreateRefreshToken, VerifyRefreshToken } from "../utils/JWT";
-import {prisma} from "../config/database";
+import { prisma } from "../config/database";
 
 export const RegistrationHandler = async (req: Request, res: Response) => {
     try {
@@ -27,7 +27,7 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             CreateError(404, "Department not found", "Registration Handler");
         }
 
-            const departmentId = departmentRecord!.id;
+        const departmentId = departmentRecord!.id;
 
         if (role == Role.HOD) {
             const hodExists = await prisma.hod.findFirst({ where: { departmentId } });
@@ -282,7 +282,11 @@ export const getUserHandler = async (req: Request, res: Response) => {
 
     try {
 
-        const { id } = req.body as { id?: string };
+        const idFromBody = (req.body as any)?.id;
+        const idFromQuery = (req.query as any)?.id;
+        const idFromParams = (req.params as any)?.id;
+
+        const id = idFromBody || idFromQuery || idFromParams;
 
         if (!id) {
             CreateError(400, "didnt get user Id", "get user handler");
@@ -293,10 +297,22 @@ export const getUserHandler = async (req: Request, res: Response) => {
             CreateError(400, "Coundlt find User from user id", "get user handler")
         }
 
+        let addData;
+
+        if (user?.role == "STUDENT") {
+            addData = await prisma.student.findUnique({ where: { userId: user.id } })
+        }
+        if (user?.role == "PROFESSOR") {
+            addData = await prisma.professor.findUnique({ where: { userId: user.id } })
+        }
+        if (user?.role == "HOD") {
+            addData = await prisma.hod.findUnique({ where: { userId: user.id } })
+        }
+
         res.status(200).json({
             result: true,
             message: "successfully get user",
-            data: user
+            data: { user, addData }
         });
 
     } catch (error) {

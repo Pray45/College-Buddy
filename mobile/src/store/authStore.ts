@@ -45,6 +45,7 @@ interface AuthState {
     refreshAccessToken: () => Promise<void>;
 
     checkAccessToken: () => Promise<void>;
+    fetchUser: (userId?: string) => Promise<void>;
 
     loggedIn: boolean;
     isprofileComplete: boolean;
@@ -91,6 +92,17 @@ export const useAuthStore = create<AuthState>()(
 
                 if (response.data.result === true) {
                     set({ loggedIn: true });
+                    
+                    // Fetch full user data from backend after registration
+                    const userData = response.data?.data?.userData;
+                    if (userData?.id) {
+                        try {
+                            await get().fetchUser(userData.id);
+                        } catch (fetchErr) {
+                            console.error('Error fetching user data after registration:', fetchErr);
+                        }
+                    }
+                    
                     return response.data;
                 }
 
@@ -128,6 +140,15 @@ export const useAuthStore = create<AuthState>()(
 
                 const isComplete = Boolean(userData?.mobile_no) && Boolean(userData?.profilePic);
                 set({ isprofileComplete: isComplete });
+
+                // Fetch full user data from backend
+                if (userData?.id) {
+                    try {
+                        await get().fetchUser(userData.id);
+                    } catch (fetchErr) {
+                        console.error('Error fetching full user data after login:', fetchErr);
+                    }
+                }
 
             } catch (err: any) {
                 const message = extractErrorMessage(err);
@@ -208,45 +229,65 @@ export const useAuthStore = create<AuthState>()(
 
 
 
+        fetchUser: async (userId?: string) => {
+            try {
+                if (!userId) return;
+                set({ loading: true, error: null });
+
+                const response = await api.get('/auth/get', { params: { id: userId } });
+
+                if (response.data?.result === true) {
+                    const apiUser = response.data?.data?.user;
+                    const addData = response.data?.data?.addData;
+                    const merged = { ...apiUser, ...(addData ?? {}) };
+
+                    const isComplete = Boolean(merged?.mobile_no) && Boolean(merged?.profilePic);
+                    set({ isprofileComplete: isComplete });
+
+                    set({ userData: merged });
+                } else {
+                    throw new Error(response.data?.message || 'Failed to fetch user');
+                }
+
+            } catch (err: any) {
+                const message = extractErrorMessage(err);
+                set({ error: message });
+                throw err;
+            } finally {
+                set({ loading: false });
+            }
+        },
+
         checkAccessToken: async () => {
             try {
-
                 set({ loading: true });
                 const accessToken = await get().getAccessToken();
 
                 if (accessToken) {
-
-                    const decodedToken = jwtDecode(accessToken);
-                    const userId = (decodedToken as any).userId;
-
-                    const response = await api.get(`/auth/user/${userId}`);
-
-                    if (response.data.result === true) {
-
-                        const user = response.data.user;
-                        const isComplete = Boolean(user?.mobile_no) && Boolean(user?.profilePic);
-                        set({ isprofileComplete: isComplete });
-
-                        set({
-                            accessToken: accessToken,
-                            userData: user,
-                            loggedIn: true
-                        });
-
+                    let decodedToken: any = {};
+                    try {
+                        decodedToken = jwtDecode(accessToken) as any;
+                    } catch (e) {
+                        decodedToken = {};
                     }
 
+                    const userId = decodedToken?.payload?.id || decodedToken?.id || decodedToken?.userId;
+
+                    if (!userId) {
+                        set({ accessToken: null, loggedIn: false });
+                        return;
+                    }
+
+                    await get().fetchUser(userId);
+
+                    set({ accessToken: accessToken, loggedIn: true });
+
                 } else {
-                    set({
-                        accessToken: null,
-                        loggedIn: false
-                    });
+                    set({ accessToken: null, loggedIn: false });
                 }
             } catch (error) {
                 console.error("Check access token error:", error);
-                set({
-                    accessToken: null,
-                    loggedIn: false
-                });
+                set({ accessToken: null, loggedIn: false });
             } finally {
                 set({ loading: false });
             }
