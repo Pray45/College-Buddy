@@ -145,12 +145,12 @@ export const useAuthStore = create<AuthState>()(
                     loggedIn: true,
                 });
 
-                get().saveTokens(accessToken, refreshToken);
+                // Save tokens BEFORE fetching user data
+                await get().saveTokens(accessToken, refreshToken);
 
                 const isComplete = Boolean(userData?.mobile_no) && Boolean(userData?.profilePic);
                 set({ isprofileComplete: isComplete });
 
-                // Fetch full user data from backend
                 if (userData?.id) {
                     try {
                         await get().fetchUser(userData.id);
@@ -252,9 +252,8 @@ export const useAuthStore = create<AuthState>()(
                 if (!userId) return;
                 set({ loading: true, error: null });
 
-                // Ensure numeric ID for backend
-                const id = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-                if (!id || Number.isNaN(id as number)) {
+                const id = String(userId);
+                if (!id || id === 'NaN') {
                     throw new Error('Invalid user id for GET request');
                 }
 

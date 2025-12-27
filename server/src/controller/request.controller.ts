@@ -9,25 +9,42 @@ export const getPendingRequestsHandler = async (req: Request, res: Response) => 
     try {
 
         const PendingRequests = await prisma.verificationRequest.findMany({
-            where: { status: 'PENDING' }
+            where: { status: 'PENDING' },
+            include: {
+                User_VerificationRequest_userIdToUser: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        verificationStatus: true,
+                    }
+                }
+            }
         })
 
         if (!PendingRequests) {
             CreateError(404, "Pendiong Request notfound", "get Pending Requests");
         }
 
-        if (PendingRequests.length === 0) {
-            res.status(200).json({
-                result: true,
-                message: "No more Pending Requests",
-                PendingRequests: []
-            });
+        const filteredRequests = [];
+        for (const request of PendingRequests) {
+            const user = request.User_VerificationRequest_userIdToUser;
+            
+            if (user && user.verificationStatus === 'APPROVED') {
+                
+                await prisma.verificationRequest.delete({
+                    where: { id: request.id }
+                });
+            } else {
+                filteredRequests.push(request);
+            }
         }
 
         res.status(200).json({
             result: true,
             message: "Successfully get all Pending Requests",
-            data: { PendingRequests }
+            data: { PendingRequests: filteredRequests }
         })
 
     } catch (error) {

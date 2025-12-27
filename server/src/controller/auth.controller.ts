@@ -318,7 +318,7 @@ export const getUserHandler = async (req: Request, res: Response) => {
         });
 
     } catch (error) {
-        console.error("error in getting user");
+        console.error("error in getting user:", error);
         res.status(500).json({
             result: false,
             message: "Internal server error in Getting user",
