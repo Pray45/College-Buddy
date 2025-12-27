@@ -168,6 +168,8 @@ export const useAuthStore = create<AuthState>()(
                 accessToken: null,
                 refreshToken: null,
                 error: null,
+                loggedIn: false,
+                isprofileComplete: false,
             });
         },
 
@@ -268,13 +270,30 @@ export const useAuthStore = create<AuthState>()(
                     try {
                         decodedToken = jwtDecode(accessToken) as any;
                     } catch (e) {
-                        decodedToken = {};
+                        console.error("Token decode error:", e);
+                        set({ accessToken: null, loggedIn: false });
+                        await get().clearTokens();
+                        return;
+                    }
+
+                    // Check token expiration
+                    const expiresAt = decodedToken?.exp;
+                    if (expiresAt) {
+                        const now = Math.floor(Date.now() / 1000);
+                        if (now > expiresAt) {
+                            // Token is expired
+                            console.warn("Token has expired");
+                            set({ accessToken: null, loggedIn: false });
+                            await get().clearTokens();
+                            return;
+                        }
                     }
 
                     const userId = decodedToken?.payload?.id || decodedToken?.id || decodedToken?.userId;
 
                     if (!userId) {
                         set({ accessToken: null, loggedIn: false });
+                        await get().clearTokens();
                         return;
                     }
 
@@ -288,6 +307,7 @@ export const useAuthStore = create<AuthState>()(
             } catch (error) {
                 console.error("Check access token error:", error);
                 set({ accessToken: null, loggedIn: false });
+                await get().clearTokens();
             } finally {
                 set({ loading: false });
             }

@@ -25,6 +25,11 @@ export default function RootLayout() {
     checkAuth();
   }, [checkAccessToken]);
 
+
+  if (!loggedIn && !inAuth && !isChecking) {
+    return <Redirect href="/(auth)/log-in" />;
+  }
+
   if (!inAuth && (isChecking || loading)) return null;
 
   if (!loggedIn && !inAuth) return <Redirect href="/(auth)/log-in" />;
