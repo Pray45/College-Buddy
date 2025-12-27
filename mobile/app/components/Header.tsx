@@ -8,6 +8,7 @@ export default function CustomHeader() {
 
     const router = useRouter();
     const login = useAuthStore((state) => state.loggedIn);
+    const user = useAuthStore((state) => state.userData);
 
     return (
         <>
@@ -15,16 +16,23 @@ export default function CustomHeader() {
 
                 <TouchableOpacity onPress={() => router.push("/")} className="flex-row gap-3">
                     <Ionicons name="school" size={24} color="white" />
-                    <Text className="text-white text-xl font-bold">College Buddy</Text> 
+                    <Text className="text-white text-xl font-bold">College Buddy</Text>
                 </TouchableOpacity>
 
                 {
                     login && (
 
-                        <TouchableOpacity onPress={() => router.push("../screens/profile")} className="w-12 h-12 rounded-full bg-accent justify-center items-center">
-                            <Ionicons name="person" size={24} color="white" />
-                        </TouchableOpacity>
+                        user?.role !== "STUDENT" ? (
+                            <TouchableOpacity onPress={() => router.push("../screens/admin")} className="p-2.5 rounded-full bg-accent justify-center items-center">
+                                <Text className="text-white text-lg font-bold">Dashboard</Text>
+                            </TouchableOpacity>
+                        ) : (
 
+                            <TouchableOpacity onPress={() => router.push("../screens/profile")} className="w-12 h-12 rounded-full bg-accent justify-center items-center">
+                                <Ionicons name="person" size={24} color="white" />
+                            </TouchableOpacity>
+
+                        )
                     )
                 }
 

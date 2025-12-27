@@ -10,6 +10,8 @@ import { initAuthInterceptors } from "../src/config/authInterceptor";
 export default function RootLayout() {
 
   const checkAccessToken = useAuthStore((state) => state.checkAccessToken);
+  const startTokenRefreshCycle = useAuthStore((state) => state.startTokenRefreshCycle);
+  const stopTokenRefreshCycle = useAuthStore((state) => state.stopTokenRefreshCycle);
   const loggedIn = useAuthStore((state) => state.loggedIn);
   const loading = useAuthStore((state) => state.loading);
   const [isChecking, setIsChecking] = useState(true);
@@ -24,6 +26,19 @@ export default function RootLayout() {
     };
     checkAuth();
   }, [checkAccessToken]);
+
+  // Start token refresh cycle when user is logged in
+  useEffect(() => {
+    if (loggedIn && !isChecking) {
+      startTokenRefreshCycle();
+    } else {
+      stopTokenRefreshCycle();
+    }
+
+    return () => {
+      stopTokenRefreshCycle();
+    };
+  }, [loggedIn, isChecking, startTokenRefreshCycle, stopTokenRefreshCycle]);
 
 
   if (!loggedIn && !inAuth && !isChecking) {

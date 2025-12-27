@@ -45,7 +45,12 @@ interface AuthState {
     refreshAccessToken: () => Promise<void>;
 
     checkAccessToken: () => Promise<void>;
-    fetchUser: (userId?: string) => Promise<void>;
+    startTokenRefreshCycle: () => void;
+    stopTokenRefreshCycle: () => void;
+    fetchUser: (userId?: number | string) => Promise<void>;
+
+    requests: any[] | null;
+    getRequests: () => Promise<void>;
 
     loggedIn: boolean;
     isprofileComplete: boolean;
@@ -55,7 +60,10 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()(
-    (set, get) => ({
+    (set, get) => {
+        let tokenRefreshInterval: ReturnType<typeof setInterval> | null = null;
+
+        return {
 
 
         /* ---------- state ---------- */
@@ -68,6 +76,7 @@ export const useAuthStore = create<AuthState>()(
         error: null,
         isprofileComplete: false,
         loggedIn: false,
+        requests: null,
 
 
         /* ---------- auth ---------- */
@@ -162,6 +171,12 @@ export const useAuthStore = create<AuthState>()(
 
 
         logout: async () => {
+            // Stop token refresh cycle
+            if (tokenRefreshInterval) {
+                clearInterval(tokenRefreshInterval);
+                tokenRefreshInterval = null;
+            }
+            
             await get().clearTokens();
             set({
                 userData: null,
@@ -214,11 +229,12 @@ export const useAuthStore = create<AuthState>()(
 
                     set({ accessToken });
                     await get().saveTokens(accessToken, newRefreshToken);
+                    console.log("✅ Token refreshed successfully");
                 } else {
                     throw new Error('Token refresh failed');
                 }
             } catch (error: any) {
-                console.error('Token refresh error:', error);
+                console.error('❌ Token refresh error:', error.message);
                 set({ loggedIn: false });
                 await get().clearTokens();
                 throw error;
@@ -231,12 +247,18 @@ export const useAuthStore = create<AuthState>()(
 
 
 
-        fetchUser: async (userId?: string) => {
+        fetchUser: async (userId?: number | string) => {
             try {
                 if (!userId) return;
                 set({ loading: true, error: null });
 
-                const response = await api.get('/auth/get', { params: { id: userId } });
+                // Ensure numeric ID for backend
+                const id = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+                if (!id || Number.isNaN(id as number)) {
+                    throw new Error('Invalid user id for GET request');
+                }
+
+                const response = await api.get('/auth/get', { params: { id } });
 
                 if (response.data?.result === true) {
                     const apiUser = response.data?.data?.user;
@@ -313,6 +335,69 @@ export const useAuthStore = create<AuthState>()(
             }
         },
 
+        // Periodic token refresh - check and refresh every 5 minutes (300,000ms)
+        // Refresh proactively if token expires in less than 5 minutes
+        startTokenRefreshCycle: () => {
+            if (tokenRefreshInterval) return; // Already running
+
+            const TOKEN_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+            const REFRESH_BUFFER = 5 * 60; // 5 minutes before expiration
+
+            tokenRefreshInterval = setInterval(async () => {
+                try {
+                    const accessToken = await get().getAccessToken();
+                    if (!accessToken) return;
+
+                    const decoded: any = jwtDecode(accessToken);
+                    const expiresAt = decoded?.exp;
+
+                    if (!expiresAt) return;
+
+                    const now = Math.floor(Date.now() / 1000);
+                    const timeUntilExpiry = expiresAt - now;
+
+                    console.log(`⏱️ Token expires in ${Math.floor(timeUntilExpiry / 60)} minutes`);
+
+                    // Refresh if token expires in less than buffer time
+                    if (timeUntilExpiry < REFRESH_BUFFER) {
+                        console.log("🔄 Proactively refreshing token...");
+                        await get().refreshAccessToken();
+                    }
+                } catch (error) {
+                    console.error("Error in token refresh cycle:", error);
+                }
+            }, TOKEN_CHECK_INTERVAL);
+
+            console.log("✅ Token refresh cycle started (checks every 5 minutes)");
+        },
+
+        stopTokenRefreshCycle: () => {
+            if (tokenRefreshInterval) {
+                clearInterval(tokenRefreshInterval);
+                tokenRefreshInterval = null;
+                console.log("⏹️ Token refresh cycle stopped");
+            }
+        },
+
+
+        getRequests: async () => {
+            try {
+                set({ loading: true, error: null });
+
+                const res = await api.get("/requests/pending");
+
+                const dataList = res.data?.data?.PendingRequests ?? res.data?.PendingRequests ?? [];
+                set({ requests: Array.isArray(dataList) ? dataList : [], });
+
+            } catch (error: any) {
+                console.error("Error in getting pending requests:", error);
+                const message = extractErrorMessage(error);
+                set({ error: message, requests: null });
+            } finally {
+                set({ loading: false });
+            }
+        },
+
 
         /* ---------- derived ---------- */
 
@@ -350,5 +435,6 @@ export const useAuthStore = create<AuthState>()(
                     return false;
             }
         },
-    }),
+        };
+    }
 );

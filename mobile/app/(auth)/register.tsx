@@ -7,7 +7,7 @@ import { useAuthStore } from '../../src/store/authStore';
 import ErrorBanner from '../components/ErrorBanner';
 import { extractErrorMessage } from '../../src/utils/extractErrorMessage';
 
-type Role = 'STUDENT' | 'PROFESSOR';
+type Role = 'STUDENT' | 'PROFESSOR' | 'HOD';
 type Department = 'CSE' | 'ECE' | 'ME' | 'EE' | 'CE';
 
 interface FormErrors {
@@ -90,7 +90,7 @@ const Register = () => {
       }
     }
 
-    if (role === 'PROFESSOR') {
+    if (role === 'PROFESSOR' || role === 'HOD') {
       const value = teacherId.trim();
       if (!value) {
         newErrors.teacherId = 'Teacher ID is required';
@@ -175,6 +175,7 @@ const Register = () => {
               <Picker selectedValue={role} onValueChange={handleRoleChange}>
                 <Picker.Item label="Student" value="STUDENT" />
                 <Picker.Item label="Professor" value="PROFESSOR" />
+                <Picker.Item label="HOD" value="HOD" />
               </Picker>
             </View>
 

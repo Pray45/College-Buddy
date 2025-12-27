@@ -256,6 +256,8 @@ export const refreashTokenHandler = async (req: Request, res: Response) => {
             data: { refreshToken: newRefreshToken },
         });
 
+        console.log("TOken Refreshed...!!!");
+
         res.status(200).json({
             result: true,
             message: "Tokens refreshed successfully",
