@@ -1,12 +1,14 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { useAuthStore } from '@/src/store/authStore';
+import {useRequestStore} from "@/src/store/requestStore";
 
 const RequestHandle = () => {
-    const getRequests = useAuthStore((state) => state.getRequests);
-    const requests = useAuthStore((state) => state.requests);
-    const loading = useAuthStore((state) => state.loading);
-    const error = useAuthStore((state) => state.error);
+    const getRequests = useRequestStore((state) => state.getRequests);
+    const requests = useRequestStore((state) => state.requests);
+    const loading = useRequestStore((state) => state.loading);
+    const error = useRequestStore((state) => state.error);
+    const actionRequests = useRequestStore((state) => state.actionRequests);
     const userData = useAuthStore((state) => state.userData);
 
     const fetchRequests = async () => {
@@ -16,6 +18,22 @@ const RequestHandle = () => {
             console.error("Failed to fetch requests:", error?.response?.status, error?.response?.data?.message);
         }
     };
+
+    const handleAction = async (requestId: string, actionType: "APPROVE" | "REJECT") => {
+        try {
+            await actionRequests({
+                approverId: userData?.id?.toString()!,
+                requestId,
+                reason: actionType,
+                action: actionType,
+            });
+
+            fetchRequests();
+        } catch (err) {
+            console.error("Action failed", err);
+        }
+    };
+
 
     const isAuthorized = userData?.role === 'HOD' || userData?.role === 'PROFESSOR';
 
@@ -83,10 +101,10 @@ const RequestHandle = () => {
                                     Reason: <Text className='text-white'>{request.reason || 'N/A'}</Text>
                                 </Text>
                                 <View className='flex-row justify-around mt-3 rounded-lg bg-accent/20 p-2'>
-                                    <TouchableOpacity className='px-4 py-2 rounded-lg'>
+                                    <TouchableOpacity className='px-4 py-2 rounded-lg' onPress={()=> handleAction(request.id, "APPROVE")}>
                                         <Text className='text-white font-bold'>Approve</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity className='px-4 py-2 rounded-lg'>
+                                    <TouchableOpacity className='px-4 py-2 rounded-lg' onPress={()=> handleAction(request.id, "REJECT")}>
                                         <Text className='text-white font-bold'>Reject</Text>
                                     </TouchableOpacity>
                                 </View>

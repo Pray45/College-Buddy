@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import {prisma} from "../config/database"
 import { CreateError } from "../config/Error";
 import { VerificationStatus } from "@prisma/client";
-import { CreateAccessToken, CreateRefreshToken } from "../utils/JWT";
+import {CreateAccessToken, CreateRefreshToken, VerifyAccessToken} from "../utils/JWT";
+import {JwtPayload} from "jsonwebtoken";
 
 export const getPendingRequestsHandler = async (req: Request, res: Response) => {
 
@@ -68,7 +69,12 @@ export const createRequestHandler = async (req: Request, res: Response) => {
             action: "APPROVE" | "REJECT";
         };
 
-        const approver = await prisma.user.findUnique({ where: { id: approverId } })
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.split(" ")[1];
+        const decoded = VerifyAccessToken(token!) as JwtPayload;
+        const userId = decoded?.payload?.id || decoded?.id;
+
+        const approver = await prisma.user.findUnique({ where: { id: userId } })
         if (!approver) {
             CreateError(404, "Approver not found in database", "create request handler");
         }
@@ -97,7 +103,7 @@ export const createRequestHandler = async (req: Request, res: Response) => {
                     where: { id: requestId },
                     data: {
                         status: VerificationStatus.APPROVED,
-                        approvedById: approverId,
+                        approvedById: userId,
                         reason: reason
                     }
                 })

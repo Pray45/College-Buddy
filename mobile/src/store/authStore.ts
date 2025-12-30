@@ -49,9 +49,6 @@ interface AuthState {
     stopTokenRefreshCycle: () => void;
     fetchUser: (userId?: number | string) => Promise<void>;
 
-    requests: any[] | null;
-    getRequests: () => Promise<void>;
-
     loggedIn: boolean;
     isprofileComplete: boolean;
     loading: boolean;
@@ -375,25 +372,6 @@ export const useAuthStore = create<AuthState>()(
                 clearInterval(tokenRefreshInterval);
                 tokenRefreshInterval = null;
                 console.log("⏹️ Token refresh cycle stopped");
-            }
-        },
-
-
-        getRequests: async () => {
-            try {
-                set({ loading: true, error: null });
-
-                const res = await api.get("/requests/pending");
-
-                const dataList = res.data?.data?.PendingRequests ?? res.data?.PendingRequests ?? [];
-                set({ requests: Array.isArray(dataList) ? dataList : [], });
-
-            } catch (error: any) {
-                console.error("Error in getting pending requests:", error);
-                const message = extractErrorMessage(error);
-                set({ error: message, requests: null });
-            } finally {
-                set({ loading: false });
             }
         },
 
