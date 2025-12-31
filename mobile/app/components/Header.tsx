@@ -14,7 +14,7 @@ export default function CustomHeader() {
         <>
             <View className="flex-row justify-between h-16 px-7 my-2 bg-secondary items-center">
 
-                <TouchableOpacity onPress={() => router.push("/")} className="flex-row gap-3">
+                <TouchableOpacity onPress={() => router.replace("/(tabs)")} className="flex-row gap-3">
                     <Ionicons name="school" size={24} color="white" />
                     <Text className="text-white text-xl font-bold">College Buddy</Text>
                 </TouchableOpacity>
@@ -23,7 +23,7 @@ export default function CustomHeader() {
                     login && (
 
                         user?.role !== "STUDENT" ? (
-                            <TouchableOpacity onPress={() => router.push("../screens/admin")} className="p-2.5 rounded-full bg-accent justify-center items-center">
+                            <TouchableOpacity onPress={() => router.replace("/(admin)")} className="p-2.5 rounded-full bg-accent justify-center items-center">
                                 <Text className="text-white text-lg font-bold">Dashboard</Text>
                             </TouchableOpacity>
                         ) : (
