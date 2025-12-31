@@ -1,8 +1,8 @@
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import React, { useState, useCallback } from 'react';
-import { Redirect, useRouter } from 'expo-router';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
 import ErrorBanner from '../components/ErrorBanner';
 import { extractErrorMessage } from '../../src/utils/extractErrorMessage';
@@ -102,9 +102,6 @@ const Register = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [name, email, password, confirm, role, enrollment, teacherId]);
-
-  // Early return after all hooks
-  if (loggedIn) return <Redirect href="/(tabs)" />;
 
   const onRegister = async () => {
     if (!validateForm()) {

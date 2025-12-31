@@ -4,6 +4,62 @@ import api from "../config/axios";
 import { jwtDecode } from "jwt-decode";
 import { extractErrorMessage } from "../utils/extractErrorMessage";
 
+const DEPARTMENT_MAP: Record<number, string> = {
+    1: "CSE",
+    2: "ECE",
+    3: "ME",
+    4: "EE",
+    5: "CIVIL",
+};
+
+const mapDepartment = (department: unknown, departmentId?: unknown): string | undefined => {
+    const fromId = departmentId ?? department;
+    const numericId = typeof fromId === "string" ? Number(fromId) : typeof fromId === "number" ? fromId : undefined;
+    if (numericId && DEPARTMENT_MAP[numericId]) return DEPARTMENT_MAP[numericId];
+    if (typeof department === "string" && department.trim() !== "") return department;
+    return undefined;
+};
+
+const normalizeUserData = (raw: any) => {
+    if (!raw) return null;
+
+    const normalized: any = {
+        id: raw.id ?? raw.userId ?? raw.payload?.id ?? raw.payload?.userId ?? null,
+        name: raw.name ?? null,
+        email: raw.email ?? "",
+        role: raw.role,
+        profilePic: raw.profilePic ?? raw.profilepic,
+        verificationStatus: raw.verificationStatus,
+        department: mapDepartment(raw.department, raw.departmentId),
+        mobile_no: raw.mobile_no ?? raw.mobileNo ?? raw.phone ?? raw.contactNo,
+    };
+
+    const student = raw.studentProfile || raw.student || raw;
+    if (raw.role === "STUDENT" || raw.studentProfile) {
+        normalized.enrollmentNo = student?.enrollmentNo ?? raw.enrollmentNo;
+        normalized.semester = student?.semester ?? raw.semester;
+        normalized.division = student?.division ?? raw.division;
+        normalized.subjects = student?.subjects ?? raw.subjects;
+        normalized.savednotes = student?.savednotes ?? raw.savednotes;
+        normalized.projects = student?.projects ?? raw.projects;
+        normalized.department = mapDepartment(normalized.department, student?.departmentId ?? student?.department ?? raw.departmentId);
+    }
+
+    const professor = raw.professorProfile || raw.professor || raw;
+    if (raw.role === "PROFESSOR" || raw.professorProfile) {
+        normalized.teacherId = professor?.teacherId ?? raw.teacherId;
+        normalized.position = professor?.position ?? raw.position;
+        normalized.department = mapDepartment(normalized.department, professor?.departmentId ?? professor?.department ?? raw.departmentId);
+    }
+
+    const hod = raw.hodProfile || raw.hod || raw;
+    if (raw.role === "HOD" || raw.hodProfile) {
+        normalized.department = mapDepartment(normalized.department, hod?.departmentId ?? hod?.department ?? raw.departmentId);
+    }
+
+    return normalized;
+};
+
 type Role = "STUDENT" | "PROFESSOR" | "HOD";
 type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -16,6 +72,7 @@ interface AuthState {
         role?: string;
         profilePic?: string;
         verificationStatus?: VerificationStatus;
+        mobile_no?: string;
 
         enrollmentNo?: string;
         semester?: number;
@@ -97,13 +154,14 @@ export const useAuthStore = create<AuthState>()(
                 });
 
                 if (response.data.result === true) {
-                    set({ loggedIn: true });
-                    
+                    const rawUser = response.data?.data?.userData;
+                    const normalized = normalizeUserData(rawUser);
+                    set({ loggedIn: true, userData: normalized });
+
                     // Fetch full user data from backend after registration
-                    const userData = response.data?.data?.userData;
-                    if (userData?.id) {
+                    if (normalized?.id) {
                         try {
-                            await get().fetchUser(userData.id);
+                            await get().fetchUser(normalized.id);
                         } catch (fetchErr) {
                             console.error('Error fetching user data after registration:', fetchErr);
                         }
@@ -135,8 +193,10 @@ export const useAuthStore = create<AuthState>()(
                 const res = await api.post("/auth/login", { email, password, role });
                 const { userData, accessToken, refreshToken } = res.data.data;
 
+                const normalized = normalizeUserData(userData);
+
                 set({
-                    userData,
+                    userData: normalized,
                     accessToken,
                     refreshToken,
                     loggedIn: true,
@@ -145,12 +205,12 @@ export const useAuthStore = create<AuthState>()(
                 // Save tokens BEFORE fetching user data
                 await get().saveTokens(accessToken, refreshToken);
 
-                const isComplete = Boolean(userData?.mobile_no) && Boolean(userData?.profilePic);
+                const isComplete = Boolean(normalized?.mobile_no) && Boolean(normalized?.profilePic);
                 set({ isprofileComplete: isComplete });
 
-                if (userData?.id) {
+                if (normalized?.id) {
                     try {
-                        await get().fetchUser(userData.id);
+                        await get().fetchUser(normalized.id);
                     } catch (fetchErr) {
                         console.error('Error fetching full user data after login:', fetchErr);
                     }
@@ -257,14 +317,15 @@ export const useAuthStore = create<AuthState>()(
                 const response = await api.get('/auth/get', { params: { id } });
 
                 if (response.data?.result === true) {
-                    const apiUser = response.data?.data?.user;
-                    const addData = response.data?.data?.addData;
-                    const merged = { ...apiUser, ...(addData ?? {}) };
+                    const payload = response.data?.data;
 
-                    const isComplete = Boolean(merged?.mobile_no) && Boolean(merged?.profilePic);
-                    set({ isprofileComplete: isComplete });
+                    const merged = payload?.user
+                        ? { ...payload.user, ...(payload.addData ?? {}) }
+                        : payload;
 
-                    set({ userData: merged });
+                    const normalized = normalizeUserData(merged);
+                    const isComplete = Boolean((normalized as any)?.mobile_no) && Boolean((normalized as any)?.profilePic);
+                    set({ isprofileComplete: isComplete, userData: normalized as any });
                 } else {
                     throw new Error(response.data?.message || 'Failed to fetch user');
                 }

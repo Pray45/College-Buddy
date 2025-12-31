@@ -314,7 +314,7 @@ export const getUserHandler = async (req: Request, res: Response) => {
         res.status(200).json({
             result: true,
             message: "successfully get user",
-            data: { user, addData }
+            data: { ...user, ...addData }
         });
 
     } catch (error) {
