@@ -4,65 +4,74 @@ import {prisma} from '../config/database';
 
 export const createDivisionHandler = async (req: Request, res: Response) => {
     try {
-        const { name, semesterId, departmentId } = req.body;
+        const { name, department, semester } = req.body;
 
-        if (!name || !semesterId || !departmentId)
-            CreateError(400, "Missing fields: name, semesterId, departmentId, hodId", "createDivisionHandler");
+        if (!name || !semester || !department) {
+            CreateError(400, "Missing fields", "createDivisionHandler");
+        }
 
-        const department = await prisma.department.findUnique({ where: { id: departmentId } });
-        if (!department) {
+        const dept = await prisma.department.findUnique({
+            where: { id: department.toString() },
+        });
+
+        if (!dept) {
             CreateError(404, "Department not found", "createDivisionHandler");
         }
 
-        const semester = await prisma.semester.findUnique({ where: { id: semesterId } });
-        if (!semester) {
+        const sem = await prisma.semester.findFirst({
+            where: {
+                departmentId: department.toString() ,
+                number: semester,
+            },
+        });
+
+        if (!sem) {
             CreateError(404, "Semester not found", "createDivisionHandler");
         }
 
+        const existingDivision = await prisma.division.findFirst({
+            where: {
+                name,
+                semesterId: sem!.id,
+            },
+        });
 
-        const existingDivision = await prisma.division.findFirst({ where: { name, semesterId } });
         if (existingDivision) {
-            CreateError(409, `Division '${name}' already exists for this semester`, "createDivisionHandler");
+            CreateError(
+                409,
+                `Division '${name}' already exists for this semester`,
+                "createDivisionHandler"
+            );
         }
 
         const division = await prisma.division.create({
             data: {
                 name,
-                department: {
-                    connect: { id: departmentId }
-                },
-                Semester: {
-                    connect: { id: semesterId }
-                },
-                updatedAt: new Date(),
+                departmentId: department.toString(),
+                semesterId: sem!.id,
             },
         });
 
         res.status(201).json({
             result: true,
             message: "Division created successfully",
-            data: { division },
+            data: division,
         });
     } catch (error: any) {
         console.error("Error in createDivisionHandler:", error);
         res.status(500).json({
             result: false,
-            message: "Internal server error in createDivisionHandler",
-            error
+            message: error.message ?? "Internal server error",
         });
     }
 };
 
 
+
 export const getDivisionHandler = async (req: Request, res: Response) => {
     try {
-        const { semesterId } = req.body;
-        if (!semesterId) {
-            CreateError(400, "Semester ID missing", "getDivisions Handler");
-        }
 
         const divisions = await prisma.division.findMany({
-            where: { semesterId },
             include: {
                 Student: {
                     include: {

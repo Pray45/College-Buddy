@@ -5,6 +5,7 @@ import CustomHeader from "./components/Header";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../src/store/authStore";
 import { initAuthInterceptors } from "../src/config/authInterceptor";
+import Toast from "react-native-toast-message";
 
 
 export default function RootLayout() {
@@ -53,6 +54,7 @@ export default function RootLayout() {
     <SafeAreaView className="flex-1 bg-secondary">
       {!inAuth && <CustomHeader />}
       <Slot />
+      <Toast/>
     </SafeAreaView>
   );
 }

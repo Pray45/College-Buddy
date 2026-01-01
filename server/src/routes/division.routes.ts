@@ -6,7 +6,7 @@ import { Role } from '@prisma/client';
 const divisionRouter: Router = express.Router();
 
 divisionRouter.post("/create", requireRole(Role.HOD, Role.PROFESSOR), createDivisionHandler);
-divisionRouter.get("/get/sem", getDivisionHandler);
+divisionRouter.get("/get", getDivisionHandler);
 divisionRouter.post("/assign", requireRole(Role.HOD, Role.PROFESSOR), assignStudentsHandler);
 divisionRouter.delete("/remove", requireRole(Role.HOD, Role.PROFESSOR), removeStudentHandler)
 divisionRouter.get("/students", getStudents);

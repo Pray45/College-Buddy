@@ -27,7 +27,16 @@ export default function AdminTabs() {
                 options={{
                     title: "requests",
                     tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="person-circle" size={size} color={color} />
+                        <Ionicons name="person-add" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="divisionHandler"
+                options={{
+                    title: "divisions",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="business-outline" size={size} color={color} />
                     ),
                 }}
             />

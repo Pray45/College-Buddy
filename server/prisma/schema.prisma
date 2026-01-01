@@ -64,6 +64,8 @@ model Semester {
   department   Department @relation(fields: [departmentId], references: [id])
   Student      Student[]
   subjects     Subject[]
+
+  @@unique([departmentId, number])
 }
 
 model Subject {
