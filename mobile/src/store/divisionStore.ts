@@ -4,9 +4,9 @@ import api from "../config/axios"; // adjust path if needed
 export interface Division {
     id: string;
     name: string;
-    semester: string;
-    department: string;
-    students?: any[];
+    semesterId: string;
+    departmentId: string;
+    Student?: any[];
 }
 
 interface DivisionStore {
@@ -44,8 +44,8 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
     getDivisions: async () => {
         set({ loading: true, error: null });
         try {
-            const res = await api.get("/div/get/sem", {});
-            set({ divisions: res.data });
+            const res = await api.get("/div/get", {});
+            set({ divisions: res.data.data.divisions });
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Failed to get divisions" });
         } finally {

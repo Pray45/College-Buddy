@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 import React from "react";
 import CreateDivision from "../components/CreateDivision";
+import GetDivision from "@/app/components/getDivision";
 
 const DivisionHandler = () => {
     return (
@@ -9,7 +10,13 @@ const DivisionHandler = () => {
                 Division Management
             </Text>
 
-            <CreateDivision/>
+            <View className="gap-2">
+
+                <CreateDivision/>
+
+                <GetDivision/>
+
+            </View>
 
         </View>
     );
