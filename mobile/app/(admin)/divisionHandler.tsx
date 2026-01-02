@@ -3,6 +3,7 @@ import React from "react";
 import CreateDivision from "../components/CreateDivision";
 import GetDivision from "@/app/components/getDivision";
 import { useAuthStore } from "@/src/store/authStore";
+import AddStudents from "@/app/components/AddStudents";
 
 const DivisionHandler = () => {
 
@@ -22,6 +23,7 @@ const DivisionHandler = () => {
                     
                         <CreateDivision/>
                         <GetDivision/>
+                        <AddStudents/>
                     
                     </View>
                 ) : (

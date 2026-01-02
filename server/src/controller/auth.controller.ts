@@ -8,13 +8,14 @@ import { prisma } from "../config/database";
 export const RegistrationHandler = async (req: Request, res: Response) => {
     try {
 
-        const { name, email, password, role, department, enrollmentNo, teacherId } = (req.body ?? {}) as {
+        const { name, email, password, role, department, enrollmentNo, semester, teacherId } = (req.body ?? {}) as {
             name: string,
             email: string,
             password: string,
             role: Role,
             department: string,
             enrollmentNo: string,
+            semester: number,
             teacherId: string,
         }
 
@@ -39,10 +40,18 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             if (!enrollmentNo) {
                 CreateError(404, "Enrollemt Number not found", "Registration Handler");
             }
+            if (!semester) {
+                CreateError(404, "Semester not found", "Registration Handler");
+            }
 
             const isExistingenrollment = await prisma.student.findUnique({ where: { enrollmentNo } });
             if (isExistingenrollment) {
                 CreateError(409, "enrollment number is alreadiy in use", "registration Handler");
+            }
+
+            const semesterRecord = await prisma.semester.findUnique({ where: { departmentId_number: { departmentId, number: semester } } });
+            if (!semesterRecord) {
+                CreateError(404, "Semester not found for this department", "Registration Handler");
             }
         }
 

@@ -91,7 +91,7 @@ interface AuthState {
 
     error: string | null;
 
-    register: (data: { name: string; email: string; password: string; role: Role; department: string; enrollmentNo?: string; teacherId?: string }) => Promise<void>;
+    register: (data: { name: string; email: string; password: string; role: Role; department: string; enrollmentNo?: string; semester?: number; teacherId?: string }) => Promise<void>;
     login: (data: { role: Role; email: string; password: string }) => Promise<void>;
     logout: () => void;
 
@@ -136,9 +136,9 @@ export const useAuthStore = create<AuthState>()(
         /* ---------- auth ---------- */
 
 
-        register: async (data: { name: string; email: string; password: string; role: Role; department: string; enrollmentNo?: string; teacherId?: string }) => {
+        register: async (data: { name: string; email: string; password: string; role: Role; department: string; enrollmentNo?: string; semester?: number; teacherId?: string }) => {
 
-            const { name, email, password, role, department, enrollmentNo, teacherId } = data;
+            const { name, email, password, role, department, enrollmentNo, semester, teacherId } = data;
 
             try {
                 set({ loading: true, error: null });
@@ -148,6 +148,7 @@ export const useAuthStore = create<AuthState>()(
                     email,
                     password,
                     enrollmentNo: enrollmentNo ?? undefined,
+                    semester: semester ?? undefined,
                     teacherId: teacherId ?? undefined,
                     department,
                     role

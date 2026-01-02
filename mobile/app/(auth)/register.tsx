@@ -1,31 +1,50 @@
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import React, { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'expo-router';
-import { useAuthStore } from '../../src/store/authStore';
-import ErrorBanner from '../components/ErrorBanner';
-import { extractErrorMessage } from '../../src/utils/extractErrorMessage';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import React, { useState, useCallback, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useAuthStore } from "../../src/store/authStore";
+import ErrorBanner from "../components/ErrorBanner";
+import { extractErrorMessage } from "../../src/utils/extractErrorMessage";
 
-type Role = 'STUDENT' | 'PROFESSOR' | 'HOD';
-type Department = 'CSE' | 'ECE' | 'ME' | 'EE' | 'CE';
+type Role = "STUDENT" | "PROFESSOR" | "HOD";
+type Department = "CSE" | "ECE" | "ME" | "EE" | "CE";
+type Semester = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 interface FormErrors {
   name?: string;
   email?: string;
   enrollment?: string;
   teacherId?: string;
+  semester?: string;
   password?: string;
   confirm?: string;
 }
 
 // Constants
 const DEPARTMENTS = [
-  { label: 'Computer Science & Engineering', value: 'CSE' },
-  { label: 'Electronics & Communication Engineering', value: 'ECE' },
-  { label: 'Mechanical Engineering', value: 'ME' },
-  { label: 'Electrical Engineering', value: 'EE' },
-  { label: 'Civil Engineering', value: 'CE' },
+  { label: "Computer Science & Engineering", value: "CSE" },
+  { label: "Electronics & Communication Engineering", value: "ECE" },
+  { label: "Mechanical Engineering", value: "ME" },
+  { label: "Electrical Engineering", value: "EE" },
+  { label: "Civil Engineering", value: "CE" },
+] as const;
+
+const SEMESTER = [
+  { label: "Semester 1", value: 1 },
+  { label: "Semester 2", value: 2 },
+  { label: "Semester 3", value: 3 },
+  { label: "Semester 4", value: 4 },
+  { label: "Semester 5", value: 5 },
+  { label: "Semester 6", value: 6 },
+  { label: "Semester 7", value: 7 },
+  { label: "Semester 8", value: 8 },
 ] as const;
 
 const Register = () => {
@@ -35,20 +54,20 @@ const Register = () => {
   const loading = useAuthStore((state: any) => state.loading);
 
   // Form state
-  const [role, setRole] = useState<Role>('STUDENT');
-  const [name, setName] = useState('');
-  const [enrollment, setEnrollment] = useState('');
-  const [teacherId, setTeacherId] = useState('');
-  const [department, setDepartment] = useState<Department>('CSE');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const [role, setRole] = useState<Role>("STUDENT");
+  const [name, setName] = useState("");
+  const [enrollment, setEnrollment] = useState("");
+  const [teacherId, setTeacherId] = useState("");
+  const [semester, setSemester] = useState("");
+  const [department, setDepartment] = useState<Department>("CSE");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
 
   const isTwelveDigits = (val: string) => /^\d{12}$/.test(val);
 
-  // Validation functions
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -66,42 +85,51 @@ const Register = () => {
     const newErrors: FormErrors = {};
 
     if (!validateName(name)) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = "Name must be at least 2 characters";
     }
 
     if (!validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!validatePassword(password)) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (password !== confirm) {
-      newErrors.confirm = 'Passwords do not match';
+      newErrors.confirm = "Passwords do not match";
     }
 
-    if (role === 'STUDENT') {
+    if (role === "STUDENT") {
       const value = enrollment.trim();
       if (!value) {
-        newErrors.enrollment = 'Enrollment number is required';
+        newErrors.enrollment = "Enrollment number is required";
       } else if (!isTwelveDigits(value)) {
-        newErrors.enrollment = 'Enrollment number must be exactly 12 digits';
+        newErrors.enrollment = "Enrollment number must be exactly 12 digits";
+      }
+
+      if (!semester) {
+        newErrors.semester = "Semester is required";
+      } else {
+        const semNum = parseInt(semester);
+        if (isNaN(semNum) || semNum < 1|| semNum > 8) {
+          newErrors.semester = "Semester must be between 1 and 8";
+        }
       }
     }
 
-    if (role === 'PROFESSOR' || role === 'HOD') {
+    if (role === "PROFESSOR" || role === "HOD") {
       const value = teacherId.trim();
       if (!value) {
-        newErrors.teacherId = 'Teacher ID is required';
+        newErrors.teacherId = "Teacher ID is required";
       } else if (!isTwelveDigits(value)) {
-        newErrors.teacherId = 'Teacher ID must be exactly 12 digits';
+        newErrors.teacherId = "Teacher ID must be exactly 12 digits";
       }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [name, email, password, confirm, role, enrollment, teacherId]);
+  }, [name, email, password, confirm, role, enrollment, teacherId, semester]);
 
   const onRegister = async () => {
     if (!validateForm()) {
@@ -116,8 +144,9 @@ const Register = () => {
         password,
         role,
         department,
-        enrollmentNo: role === 'STUDENT' ? enrollment.trim() : undefined,
-        teacherId: role === 'PROFESSOR' ? teacherId.trim() : undefined,
+        enrollmentNo: role === "STUDENT" ? enrollment.trim() : undefined,
+        teacherId: role === "PROFESSOR" ? teacherId.trim() : undefined,
+        semester: role === "STUDENT" ? parseInt(semester) : undefined,
       });
     } catch (e: any) {
       const message = extractErrorMessage(e);
@@ -128,6 +157,9 @@ const Register = () => {
   const handleRoleChange = (newRole: Role) => {
     setRole(newRole);
     setErrors({});
+    if (newRole !== "STUDENT") {
+      setSemester("");
+    }
   };
 
   return (
@@ -141,31 +173,40 @@ const Register = () => {
     >
       <View className="flex-1 bg-primary">
         <View className="h-48 justify-end px-6 pb-6">
-          <Text className="text-4xl text-textPrimary font-bold">Get Started Now</Text>
-          <Text className="text-textSecondary mt-1">Create an account or log in to explore</Text>
+          <Text className="text-4xl text-textPrimary font-bold">
+            Get Started Now
+          </Text>
+          <Text className="text-textSecondary mt-1">
+            Create an account or log in to explore
+          </Text>
         </View>
 
         <View className="flex-1 bg-white rounded-t-3xl p-6">
           {/* Tab Switcher */}
           <View className="bg-gray-100 rounded-2xl p-1 flex-row w-full mx-auto">
             <TouchableOpacity
-              onPress={() => router.push('/(auth)/log-in')}
+              onPress={() => router.push("/(auth)/log-in")}
               className="flex-1 py-3 rounded-2xl items-center"
               activeOpacity={0.7}
             >
               <Text className="text-lg text-textSecondary">Log In</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => router.push('/(auth)/register')}
+              onPress={() => router.push("/(auth)/register")}
               className="flex-1 py-3 rounded-2xl bg-white items-center"
               activeOpacity={0.7}
             >
-              <Text className="text-lg font-semibold text-textPrimary">Register</Text>
+              <Text className="text-lg font-semibold text-textPrimary">
+                Register
+              </Text>
             </TouchableOpacity>
           </View>
 
           <View className="mt-6">
-            <ErrorBanner message={serverError} onClose={() => setServerError(null)} />
+            <ErrorBanner
+              message={serverError}
+              onClose={() => setServerError(null)}
+            />
             {/* Role Picker */}
             <Text className="text-sm text-black mb-2 font-bold">Role</Text>
             <View className="bg-[#F3F4F6] rounded-md mb-4">
@@ -188,11 +229,15 @@ const Register = () => {
               autoCapitalize="words"
               className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
-            {errors.name && <Text className="text-red-500 text-xs mb-3">{errors.name}</Text>}
+            {errors.name && (
+              <Text className="text-red-500 text-xs mb-3">{errors.name}</Text>
+            )}
             {!errors.name && <View className="mb-3" />}
 
             {/* Email */}
-            <Text className="text-sm text-black mb-2 font-bold">Email Address</Text>
+            <Text className="text-sm text-black mb-2 font-bold">
+              Email Address
+            </Text>
             <TextInput
               value={email}
               onChangeText={(text) => {
@@ -205,50 +250,97 @@ const Register = () => {
               autoComplete="email"
               className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
-            {errors.email && <Text className="text-red-500 text-xs mb-3">{errors.email}</Text>}
+            {errors.email && (
+              <Text className="text-red-500 text-xs mb-3">{errors.email}</Text>
+            )}
             {!errors.email && <View className="mb-3" />}
 
             {/* Department Picker */}
-            <Text className="text-sm text-black mb-2 font-bold">Department</Text>
+            <Text className="text-sm text-black mb-2 font-bold">
+              Department
+            </Text>
             <View className="bg-[#F3F4F6] rounded-md mb-4">
-              <Picker selectedValue={department} onValueChange={(value:any) => setDepartment(value as Department)}>
+              <Picker
+                selectedValue={department}
+                onValueChange={(value: any) =>
+                  setDepartment(value as Department)
+                }
+              >
                 {DEPARTMENTS.map((dept) => (
-                  <Picker.Item key={dept.value} label={dept.label} value={dept.value} />
+                  <Picker.Item
+                    key={dept.value}
+                    label={dept.label}
+                    value={dept.value}
+                  />
                 ))}
               </Picker>
             </View>
 
             {/* Conditional Fields */}
-            {role === 'STUDENT' ? (
+            {role === "STUDENT" ? (
               <>
-                <Text className="text-sm text-black mb-2 font-bold">Enrollment Number</Text>
+                <Text className="text-sm text-black mb-2 font-bold">
+                  Enrollment Number
+                </Text>
                 <TextInput
                   value={enrollment}
                   onChangeText={(text) => {
                     setEnrollment(text);
-                    if (errors.enrollment) setErrors({ ...errors, enrollment: undefined });
+                    if (errors.enrollment)
+                      setErrors({ ...errors, enrollment: undefined });
                   }}
                   placeholder="Enter enrollment number"
                   keyboardType="number-pad"
                   className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
                 />
-                {errors.enrollment && <Text className="text-red-500 text-xs mb-3">{errors.enrollment}</Text>}
+                {errors.enrollment && (
+                  <Text className="text-red-500 text-xs mb-3">
+                    {errors.enrollment}
+                  </Text>
+                )}
                 {!errors.enrollment && <View className="mb-3" />}
+
+                <Text className="text-sm text-black mb-2 font-bold">
+                  Semester
+                </Text>
+                <View className="bg-[#F3F4F6] rounded-md mb-4">
+                  <Picker
+                    selectedValue={semester}
+                    onValueChange={(value: any) =>
+                      setSemester(value)
+                    }
+                  >
+                    {SEMESTER.map((sem) => (
+                      <Picker.Item
+                        key={sem.value}
+                        label={sem.label}
+                        value={sem.value}
+                      />
+                    ))}
+                  </Picker>
+                </View>
               </>
             ) : (
               <>
-                <Text className="text-sm text-black mb-2 font-bold">Teacher ID</Text>
+                <Text className="text-sm text-black mb-2 font-bold">
+                  Teacher ID
+                </Text>
                 <TextInput
                   value={teacherId}
                   onChangeText={(text) => {
                     setTeacherId(text);
-                    if (errors.teacherId) setErrors({ ...errors, teacherId: undefined });
+                    if (errors.teacherId)
+                      setErrors({ ...errors, teacherId: undefined });
                   }}
                   placeholder="Enter employee ID"
                   keyboardType="number-pad"
                   className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
                 />
-                {errors.teacherId && <Text className="text-red-500 text-xs mb-3">{errors.teacherId}</Text>}
+                {errors.teacherId && (
+                  <Text className="text-red-500 text-xs mb-3">
+                    {errors.teacherId}
+                  </Text>
+                )}
                 {!errors.teacherId && <View className="mb-3" />}
               </>
             )}
@@ -259,37 +351,49 @@ const Register = () => {
               value={password}
               onChangeText={(text) => {
                 setPassword(text);
-                if (errors.password) setErrors({ ...errors, password: undefined });
+                if (errors.password)
+                  setErrors({ ...errors, password: undefined });
               }}
               placeholder="••••••••"
               secureTextEntry
               autoCapitalize="none"
               className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
-            {errors.password && <Text className="text-red-500 text-xs mb-3">{errors.password}</Text>}
+            {errors.password && (
+              <Text className="text-red-500 text-xs mb-3">
+                {errors.password}
+              </Text>
+            )}
             {!errors.password && <View className="mb-3" />}
 
             {/* Confirm Password */}
-            <Text className="text-sm text-black mb-2 font-bold">Confirm Password</Text>
+            <Text className="text-sm text-black mb-2 font-bold">
+              Confirm Password
+            </Text>
             <TextInput
               value={confirm}
               onChangeText={(text) => {
                 setConfirm(text);
-                if (errors.confirm) setErrors({ ...errors, confirm: undefined });
+                if (errors.confirm)
+                  setErrors({ ...errors, confirm: undefined });
               }}
               placeholder="••••••••"
               secureTextEntry
               autoCapitalize="none"
               className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
-            {errors.confirm && <Text className="text-red-500 text-xs mb-3">{errors.confirm}</Text>}
+            {errors.confirm && (
+              <Text className="text-red-500 text-xs mb-3">
+                {errors.confirm}
+              </Text>
+            )}
             {!errors.confirm && <View className="mb-3" />}
 
             {/* Register Button */}
             <TouchableOpacity
               onPress={onRegister}
               disabled={loading}
-              className={`bg-textPrimary h-12 rounded-full items-center justify-center mt-4 ${loading ? 'opacity-50' : ''}`}
+              className={`bg-textPrimary h-12 rounded-full items-center justify-center mt-4 ${loading ? "opacity-50" : ""}`}
               activeOpacity={0.8}
             >
               {loading ? (
