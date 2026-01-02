@@ -15,6 +15,7 @@ export default function RootLayout() {
   const stopTokenRefreshCycle = useAuthStore((state) => state.stopTokenRefreshCycle);
   const loggedIn = useAuthStore((state) => state.loggedIn);
   const loading = useAuthStore((state) => state.loading);
+  const userData = useAuthStore((state) => state.userData);
   const [isChecking, setIsChecking] = useState(true);
   const segments = useSegments();
   const inAuth = segments?.[0] === "(auth)";
@@ -49,6 +50,11 @@ export default function RootLayout() {
   if (!inAuth && (isChecking || loading)) return null;
 
   if (!loggedIn && !inAuth) return <Redirect href="/(auth)/log-in" />;
+
+  // Redirect users with PENDING verification back to login
+  if (loggedIn && !inAuth && userData?.verificationStatus === "PENDING") {
+    return <Redirect href="/(auth)/log-in" />;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-secondary">

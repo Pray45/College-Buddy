@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Redirect, useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
 import ErrorBanner from '../components/ErrorBanner';
@@ -9,15 +9,32 @@ import { extractErrorMessage } from '../../src/utils/extractErrorMessage';
 const Login = () => {
     const router = useRouter();
     const loggedIn = useAuthStore((state: any) => state.loggedIn);
+    const userData = useAuthStore((state: any) => state.userData);
     const login = useAuthStore((state: any) => state.login);
+    const logout = useAuthStore((state: any) => state.logout);
     const loading = useAuthStore((state: any) => state.loading);
 
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('STUDENT');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
 
-    if (loggedIn) return <Redirect href="/(tabs)" />;
+    // Check for pending verification
+    useEffect(() => {
+        if (loggedIn && userData?.verificationStatus === "PENDING") {
+            setVerificationMessage(
+                "Your account is pending verification. Please wait for admin approval before accessing the app."
+            );
+        } else {
+            setVerificationMessage(null);
+        }
+    }, [loggedIn, userData]);
+
+    // Only redirect to tabs if logged in AND verified
+    if (loggedIn && userData?.verificationStatus === "APPROVED") {
+        return <Redirect href="/(tabs)" />;
+    }
 
     const onSubmit = async () => {
         setError(null);
@@ -81,6 +98,18 @@ const Login = () => {
                                 <Text className={`${role === 'PROFESSOR' ? 'text-primary font-bold' : 'text-textSecondary'}`}>PROFESSOR</Text>
                             </TouchableOpacity>
                         </View>
+
+                        {verificationMessage && (
+                            <View className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 mb-4">
+                                <Text className="text-yellow-800 text-sm font-medium">{verificationMessage}</Text>
+                                <TouchableOpacity 
+                                    onPress={logout}
+                                    className="bg-yellow-600 mt-3 h-10 rounded-md items-center justify-center"
+                                >
+                                    <Text className="text-white font-bold">Logout</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
 
                         <ErrorBanner message={error} onClose={() => setError(null)} />
 

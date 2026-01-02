@@ -7,7 +7,14 @@ const TabsLayout = () => {
 
   const router = useRouter();
   const loggedIn = useAuthStore((state) => state.loggedIn);
+  const userData = useAuthStore((state) => state.userData);
+  
   if (!loggedIn) return <Redirect href="/(auth)/log-in" />;
+  
+  // Prevent access if verification is pending
+  if (userData?.verificationStatus === "PENDING") {
+    return <Redirect href="/(auth)/log-in" />;
+  }
 
   return (
     <Tabs screenOptions={{
