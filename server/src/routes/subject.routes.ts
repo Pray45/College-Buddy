@@ -1,7 +1,7 @@
 import express from 'express'
 import { createSubjectHandler, deleteSubjectHanlder, getSubjectByDeoartrmentHandler, getSubjectHandler } from '../controller/subject.controller';
 import { requireRole } from '../middleware/authorization.middleware';
-import { Role } from '@prisma/client';
+import { Role } from "../generated/prisma/enums";
 
 const subjectRouter = express.Router();
 

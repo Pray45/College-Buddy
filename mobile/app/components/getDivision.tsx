@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import React, { useMemo, useState, useEffect } from "react";
 import { useDivisionStore } from "@/src/store/divisionStore";
+import { useRouter } from "expo-router";
 
 const SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const DEPARTMENTS = [
@@ -15,6 +16,7 @@ const GetDivision = () => {
     const [open, setOpen] = useState(false);
     const [semester, setSemester] = useState<string | null>(null);
     const [department, setDepartment] = useState<string | null>(null);
+    const router = useRouter();
 
     const { divisions, loading, getDivisions } = useDivisionStore();
 
@@ -114,7 +116,8 @@ const GetDivision = () => {
 
                     {!loading &&
                         filteredDivisions.map((div) => (
-                            <View
+                            <TouchableOpacity
+                                onPress={() => router.push(`../screens/division/${div.id}`)}
                                 key={div.id}
                                 className="mt-2 flex-row justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5"
                             >
@@ -133,7 +136,7 @@ const GetDivision = () => {
                                         {div.Student?.length ?? 0} Students
                                     </Text>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         ))}
                 </View>
             )}

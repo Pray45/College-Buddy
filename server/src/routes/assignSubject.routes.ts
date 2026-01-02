@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import { assignTeacherHandler, getAssignedHandler, deleteAssignedHanlder } from '../controller/subjectAssign.controller';
 import { requireRole } from '../middleware/authorization.middleware';
-import { Role } from '@prisma/client';
+import { Role } from "../generated/prisma/enums";
 
 const assignRoutrer: Router = express.Router();
 

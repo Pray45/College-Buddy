@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { CreateError } from "../config/Error"
 import { BcryptCheck, BcryptHash } from "../utils/bcrypt";
-import { Role, VerificationStatus, VerificationType } from "@prisma/client"
+import { Role, VerificationStatus, VerificationType } from "../generated/prisma/enums"
 import { CreateAccessToken, CreateRefreshToken, VerifyRefreshToken } from "../utils/JWT";
 import { prisma } from "../config/database";
 

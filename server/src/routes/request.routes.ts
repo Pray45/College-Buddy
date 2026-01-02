@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { createRequestHandler, getPendingRequestsHandler } from "../controller/request.controller";
 import { requireRole } from "../middleware/authorization.middleware";
-import { Role } from "@prisma/client";
+import { Role } from "../generated/prisma/enums";
 
 const requestRouter: Router = express.Router();
 

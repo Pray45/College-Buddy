@@ -15,6 +15,14 @@ interface DivisionStore {
     loading: boolean;
     error: string | null;
 
+    Student: {
+        id: string;
+        name: string;
+        semesterId: string;
+        departmentId: string;
+        Student?: any[];
+    } | null;
+
     getDivisions: () => Promise<void>;
     createDivision: (data: {
         name: string;
@@ -40,6 +48,7 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
     students: null,
     loading: false,
     error: null,
+    Student: null,
 
     getDivisions: async () => {
         set({ loading: true, error: null });
@@ -53,10 +62,10 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
         }
     },
 
-    createDivision: async ({name, department, semester}) => {
+    createDivision: async ({ name, department, semester }) => {
         set({ loading: true, error: null });
         try {
-            await api.post("/div/create", {name, department, semester});
+            await api.post("/div/create", { name, department, semester });
             await get().getDivisions();
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Failed to create division" });
@@ -89,13 +98,22 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
         }
     },
 
-    getStudents: async (divisionId) => {
+    getStudents: async (divisionId: string) => {
         set({ loading: true, error: null });
+
         try {
-            const res = await api.get(`/divisions/${divisionId}/students`);
-            set({ students: res.data });
+            const res = await api.get(`/div/students/${divisionId}`);
+
+            set({
+                Student: res.data.data.students,
+                students: res.data.data.students.Student
+            });
         } catch (err: any) {
-            set({ error: err.response?.data?.message || "Failed to load students" });
+            set({
+                error:
+                    err.response?.data?.message ||
+                    "Failed to load students",
+            });
         } finally {
             set({ loading: false });
         }

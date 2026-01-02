@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import { assignStudentsHandler, createDivisionHandler, getDivisionHandler, getStudents, removeStudentHandler } from '../controller/division.controller';
 import { requireRole } from '../middleware/authorization.middleware';
-import { Role } from '@prisma/client';
+import { Role } from "../generated/prisma/enums";
 
 const divisionRouter: Router = express.Router();
 

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import {prisma} from "../config/database";
 import { CreateError } from "../config/Error";
-import { Role } from "@prisma/client";
+import { Role } from "../generated/prisma/enums";
 import { VerifyAccessToken } from "../utils/JWT";
 
 export interface AuthenticatedRequest extends Request {

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {prisma} from "../config/database"
 import { CreateError } from "../config/Error";
-import { VerificationStatus } from "@prisma/client";
+import { VerificationStatus } from "../generated/prisma/enums";
 import {CreateAccessToken, CreateRefreshToken, VerifyAccessToken} from "../utils/JWT";
 import {JwtPayload} from "jsonwebtoken";
 
