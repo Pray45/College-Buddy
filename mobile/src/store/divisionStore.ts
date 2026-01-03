@@ -4,7 +4,7 @@ import api from "../config/axios"; // adjust path if needed
 export interface Division {
     id: string;
     name: string;
-    semesterId: string;
+    semesterId: string | number;
     departmentId: string;
     Student?: any[];
 }
@@ -18,7 +18,7 @@ interface DivisionStore {
     Student: {
         id: string;
         name: string;
-        semesterId: string;
+        semesterId: string | number;
         departmentId: string;
         Student?: any[];
     } | null;
@@ -30,7 +30,12 @@ interface DivisionStore {
         department: string;
     }) => Promise<void>;
 
-    addStudentsToDivision: (data: {
+    fetchStudents: (params: {
+        departmentId: string;
+        semester: number;
+    }) => Promise<void>;
+
+    assignStudents: (data: {
         divisionId: string;
         studentIds: string[];
     }) => Promise<void>;
@@ -74,13 +79,37 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
         }
     },
 
-    addStudentsToDivision: async (data) => {
-        set({ loading: true, error: null });
+    fetchStudents: async ({ departmentId, semester }) => {
         try {
-            await api.post("/divisions/add-students", data);
-            await get().getDivisions();
+            set({ loading: true, error: null });
+
+            const res = await api.get("/div/sem/students", {
+                params: { departmentId, semester },
+            });
+
+            set({ students: res.data.data.students });
         } catch (err: any) {
-            set({ error: err.response?.data?.message || "Failed to add students" });
+            set({
+                error: err.response?.data?.message || "Failed to fetch students",
+            });
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    assignStudents: async ({ divisionId, studentIds }) => {
+        try {
+            set({ loading: true, error: null });
+
+            await api.post("/div/assign", {
+                divisionId,
+                studentIds,
+            });
+        } catch (err: any) {
+            set({
+                error: err.response?.data?.message || "Failed to assign students",
+            });
+            throw err;
         } finally {
             set({ loading: false });
         }
@@ -89,7 +118,7 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
     removeStudentFromDivision: async (data) => {
         set({ loading: true, error: null });
         try {
-            await api.post("/divisions/remove-student", data);
+            await api.delete("/div/remove", { data });
             await get().getDivisions();
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Failed to remove student" });
