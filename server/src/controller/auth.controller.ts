@@ -193,7 +193,18 @@ export const loginHandler = async (req: Request, res: Response) => {
         });
 
         if (user?.role === "STUDENT") {
-            const studentProfile = await prisma.student.findUnique({ where: { userId: user.id } });
+            const studentProfile = await prisma.student.findUnique({
+                where: { userId: user.id },
+                include: {
+                    Semester: true,
+                    Division: true,
+                    StudentSubject: {
+                        include: {
+                            Subject: true
+                        }
+                    }
+                }
+            });
             userData = { ...userData, studentProfile };
         }
 
@@ -311,7 +322,18 @@ export const getUserHandler = async (req: Request, res: Response) => {
         let addData;
 
         if (user?.role == "STUDENT") {
-            addData = await prisma.student.findUnique({ where: { userId: user.id } })
+            addData = await prisma.student.findUnique({
+                where: { userId: user.id },
+                include: {
+                    Semester: true,
+                    Division: true,
+                    StudentSubject: {
+                        include: {
+                            Subject: true
+                        }
+                    }
+                }
+            })
         }
         if (user?.role == "PROFESSOR") {
             addData = await prisma.professor.findUnique({ where: { userId: user.id } })

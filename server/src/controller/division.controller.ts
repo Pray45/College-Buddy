@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { CreateError } from '../config/Error';
 import { prisma } from '../config/database';
+import { EnrollmentStatus } from '../generated/prisma/enums';
 
 export const createDivisionHandler = async (req: Request, res: Response) => {
     try {
@@ -95,7 +96,7 @@ export const getDivisionHandler = async (req: Request, res: Response) => {
             error
         });
     }
-};
+}
 
 
 export const assignStudentsHandler = async (req: Request, res: Response) => {
@@ -113,7 +114,7 @@ export const assignStudentsHandler = async (req: Request, res: Response) => {
         const result = await prisma.$transaction(async (tx) => {
             const division = await tx.division.findUnique({
                 where: { id: divisionId },
-                select: { id: true, name: true },
+                select: { id: true, name: true, semesterId: true },
             });
 
             if (!division) {
@@ -150,8 +151,36 @@ export const assignStudentsHandler = async (req: Request, res: Response) => {
 
             await tx.student.updateMany({
                 where: { id: { in: unassignedIds } },
-                data: { divisionId },
+                data: { divisionId, semesterId: division.semesterId },
             });
+
+            const divisionSubjects = await tx.divisionSubjectAssignment.findMany({
+                where: { divisionId },
+                select: { subjectId: true },
+            });
+
+            if (divisionSubjects.length > 0) {
+                const subjectIds = divisionSubjects.map(ds => ds.subjectId);
+
+                for (const studentId of unassignedIds) {
+                    for (const subjectId of subjectIds) {
+                        await tx.studentSubject.upsert({
+                            where: {
+                                studentId_subjectId: {
+                                    studentId,
+                                    subjectId,
+                                },
+                            },
+                            update: {},
+                            create: {
+                                studentId,
+                                subjectId,
+                                status: EnrollmentStatus.ACTIVE,
+                            },
+                        });
+                    }
+                }
+            }
 
             return {
                 divisionName: division.name,

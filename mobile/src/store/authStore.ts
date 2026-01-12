@@ -37,9 +37,9 @@ const normalizeUserData = (raw: any) => {
     const student = raw.studentProfile || raw.student || raw;
     if (raw.role === "STUDENT" || raw.studentProfile) {
         normalized.enrollmentNo = student?.enrollmentNo ?? raw.enrollmentNo;
-        normalized.semester = student?.semester ?? raw.semester;
-        normalized.division = student?.division ?? raw.division;
-        normalized.subjects = student?.subjects ?? raw.subjects;
+        normalized.semester = student?.Semester?.number ?? student?.semester ?? raw.semester;
+        normalized.division = student?.Division?.name ?? student?.division ?? raw.division;
+        normalized.subjects = student?.StudentSubject?.map((ss: any) => ss.Subject?.name).filter(Boolean) ?? student?.subjects ?? raw.subjects;
         normalized.savednotes = student?.savednotes ?? raw.savednotes;
         normalized.projects = student?.projects ?? raw.projects;
         normalized.department = mapDepartment(normalized.department, student?.departmentId ?? student?.department ?? raw.departmentId);

@@ -16,7 +16,7 @@ export default function AdminTabs() {
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: "profile",
+                    title: "Profile",
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person" size={size} color={color} />
                     ),
@@ -25,7 +25,7 @@ export default function AdminTabs() {
             <Tabs.Screen
                 name="requestHandle"
                 options={{
-                    title: "requests",
+                    title: "Requests",
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person-add" size={size} color={color} />
                     ),
@@ -34,9 +34,18 @@ export default function AdminTabs() {
             <Tabs.Screen
                 name="divisionHandler"
                 options={{
-                    title: "divisions",
+                    title: "Divisions",
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="business-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="SubjectHandler"
+                options={{
+                    title: "Subjects",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="book-outline" size={size} color={color} />
                     ),
                 }}
             />

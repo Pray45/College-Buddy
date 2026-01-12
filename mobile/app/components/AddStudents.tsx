@@ -103,9 +103,9 @@ const AssignStudents = () => {
               selectedValue={departmentId}
               onValueChange={(v) => setDepartmentId(v)}
             >
-              <Picker.Item label="Select Department" value={null} />
+              <Picker.Item label="Select Department" value={null} color="#9ca3af" />
               {DEPARTMENTS.map((d) => (
-                <Picker.Item key={d.value} label={d.label} value={d.value} />
+                <Picker.Item key={d.value} label={d.label} value={d.value} color="#9ca3af"/>
               ))}
             </Picker>
           </View>
@@ -116,9 +116,9 @@ const AssignStudents = () => {
               selectedValue={semesterId}
               onValueChange={(v) => setSemesterId(v)}
             >
-              <Picker.Item label="Select Semester" value={null} />
+              <Picker.Item label="Select Semester" value={null} color="#9ca3af" />
               {SEMESTERS.map((s) => (
-                <Picker.Item key={s} label={`Semester ${s}`} value={s} />
+                <Picker.Item key={s} label={`Semester ${s}`} value={s} color="#9ca3af" />
               ))}
             </Picker>
           </View>
@@ -129,12 +129,13 @@ const AssignStudents = () => {
               selectedValue={selectedDivisionId}
               onValueChange={(v) => setSelectedDivisionId(v)}
             >
-              <Picker.Item label="Select Division" value={null} />
+              <Picker.Item label="Select Division" value={null} color="#9ca3af" />
               {divisions?.map((d) => (
                 <Picker.Item
                   key={d.id}
                   label={`${d.name} (${d.departmentId})`}
                   value={d.id}
+                  color="#9ca3af"
                 />
               ))}
             </Picker>
