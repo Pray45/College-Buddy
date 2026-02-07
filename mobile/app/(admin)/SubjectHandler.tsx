@@ -2,6 +2,7 @@ import { Text, View } from "react-native";
 import React from "react";
 import { useAuthStore } from "@/src/store/authStore";
 import CreateSubject from "../components/CreateSubject";
+import GetSubject from "../components/getSubject";
 
 const SubjectHandler = () => {
   
@@ -16,6 +17,7 @@ const SubjectHandler = () => {
         {userData?.role === "HOD" ? (
           <View className="gap-2">
             <CreateSubject />
+            <GetSubject />
           </View>
         ) : (
           <View className="gap-2">

@@ -367,3 +367,50 @@ export const getStudents = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const deleteDivisionHandler = async (req: Request, res: Response) => {
+    try {
+        const { divisionId } = req.body;
+
+        if (!divisionId) {
+            CreateError(400, "Division ID missing", "deleteDivisionHandler");
+        }
+
+        const division = await prisma.division.findUnique({ 
+            where: { id: divisionId },
+            include: {
+                Student: true,
+                DivisionSubjectAssignment: true
+            }
+        });
+
+        if (!division) {
+            CreateError(404, "Division not found", "deleteDivisionHandler");
+        }
+
+        await prisma.$transaction([
+            prisma.student.updateMany({
+                where: { divisionId },
+                data: { divisionId: null }
+            }),
+            prisma.divisionSubjectAssignment.deleteMany({
+                where: { divisionId }
+            }),
+            prisma.division.delete({
+                where: { id: divisionId }
+            })
+        ]);
+
+        res.status(200).json({
+            result: true,
+            message: `Division '${division!.name}' deleted successfully`,
+        });
+    } catch (error: any) {
+        console.error("Error in deleteDivisionHandler:", error);
+        res.status(error.statusCode || 500).json({
+            result: false,
+            message: "Internal server error in deleteDivisionHandler",
+            error
+        });
+    }
+};

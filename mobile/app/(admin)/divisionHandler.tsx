@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import React from "react";
 import CreateDivision from "../components/CreateDivision";
 import GetDivision from "@/app/components/getDivision";
@@ -10,7 +10,7 @@ const DivisionHandler = () => {
     const userData = useAuthStore((s) => s.userData);
 
     return (
-        <View className="bg-primary flex-1 px-5 py-6">
+        <ScrollView className="bg-primary flex-1 px-5 py-6 pb-10">
             <Text className="text-white text-2xl font-bold mb-6">
                 Division Management
             </Text>
@@ -35,7 +35,7 @@ const DivisionHandler = () => {
                 )
             }
 
-        </View>
+        </ScrollView>
     );
 };
 

@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useDivisionStore } from "@/src/store/divisionStore";
+import { useAuthStore } from "@/src/store/authStore";
 
 const DEPARTMENT_MAP: Record<string, string> = {
     "1": "CSE",
@@ -15,7 +16,9 @@ const DEPARTMENT_MAP: Record<string, string> = {
 const DivisionDetails = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id?: string }>();
-    const { divisions, loading, getDivisions } = useDivisionStore();
+    const { divisions, loading, getDivisions, removeStudentFromDivision, deleteDivision } = useDivisionStore();
+    const userData = useAuthStore((s) => s.userData);
+    const [deletingStudent, setDeletingStudent] = useState<string | null>(null);
 
     useEffect(() => {
         if (!divisions && !loading && id) {
@@ -90,6 +93,40 @@ const DivisionDetails = () => {
                 </View>
             </View>
 
+            {userData?.role === "HOD" && (
+                <TouchableOpacity
+                    onPress={() => {
+                        Alert.alert(
+                            "Delete Division",
+                            `Are you sure you want to delete Division ${division.name}? This will unassign all students.`,
+                            [
+                                { text: "Cancel", style: "cancel" },
+                                {
+                                    text: "Delete",
+                                    style: "destructive",
+                                    onPress: async () => {
+                                        try {
+                                            await deleteDivision(id!);
+                                            Alert.alert("Success", "Division deleted successfully");
+                                            router.replace("/(admin)/divisionHandler");
+                                        } catch (error) {
+                                            Alert.alert("Error", "Failed to delete division");
+                                        }
+                                    },
+                                },
+                            ]
+                        );
+                    }}
+                    className="bg-red-500/10 p-4 rounded-2xl border border-red-500/30 mb-4 flex-row items-center justify-between"
+                >
+                    <View>
+                        <Text className="text-red-500 font-semibold text-base">Delete Division</Text>
+                        <Text className="text-red-400/70 text-xs mt-1">This will unassign all students</Text>
+                    </View>
+                    <Ionicons name="trash" size={24} color="#ef4444" />
+                </TouchableOpacity>
+            )}
+
             <View className="bg-secondary p-5 rounded-2xl border border-white/10 shadow-sm shadow-black/30">
                 <View className="flex-row items-center justify-between mb-3">
                     <Text className="text-white text-lg font-semibold">Students</Text>
@@ -107,12 +144,53 @@ const DivisionDetails = () => {
                         key={student.id}
                         className="mb-3 p-4 rounded-xl bg-black/25 border border-white/5 flex-row items-center justify-between"
                     >
-                        <View>
+                        <View className="flex-1">
                             <Text className="text-white font-semibold">{student.User?.name ?? "Unnamed"}</Text>
                             <Text className="text-gray-400 text-sm">{student.User?.email ?? "No email"}</Text>
                         </View>
-                        <View className="bg-accent/20 px-3 py-1 rounded-full border border-accent/40">
-                            <Text className="text-accent text-xs font-semibold">ID {student.id.slice(0, 6)}</Text>
+                        <View className="flex-row items-center gap-2">
+                            <View className="bg-accent/20 px-3 py-1 rounded-full border border-accent/40">
+                                <Text className="text-accent text-xs font-semibold">ID {student.id.slice(0, 6)}</Text>
+                            </View>
+                            {userData?.role === "HOD" && (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        Alert.alert(
+                                            "Remove Student",
+                                            `Remove ${student.User?.name} from this division?`,
+                                            [
+                                                { text: "Cancel", style: "cancel" },
+                                                {
+                                                    text: "Remove",
+                                                    style: "destructive",
+                                                    onPress: async () => {
+                                                        setDeletingStudent(student.id);
+                                                        try {
+                                                            await removeStudentFromDivision({
+                                                                divisionId: id!,
+                                                                studentIds: [student.id],
+                                                            });
+                                                            Alert.alert("Success", "Student removed successfully");
+                                                        } catch (error) {
+                                                            Alert.alert("Error", "Failed to remove student");
+                                                        } finally {
+                                                            setDeletingStudent(null);
+                                                        }
+                                                    },
+                                                },
+                                            ]
+                                        );
+                                    }}
+                                    disabled={deletingStudent === student.id}
+                                    className="bg-red-500/20 p-2 rounded-lg border border-red-500/40"
+                                >
+                                    {deletingStudent === student.id ? (
+                                        <ActivityIndicator size="small" color="#ef4444" />
+                                    ) : (
+                                        <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                                    )}
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
                 ))}

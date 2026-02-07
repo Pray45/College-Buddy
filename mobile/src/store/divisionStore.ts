@@ -42,8 +42,10 @@ interface DivisionStore {
 
     removeStudentFromDivision: (data: {
         divisionId: string;
-        studentId: string;
+        studentIds: string[];
     }) => Promise<void>;
+
+    deleteDivision: (divisionId: string) => Promise<void>;
 
     getStudents: (divisionId: string) => Promise<void>;
 }
@@ -122,6 +124,23 @@ export const useDivisionStore = create<DivisionStore>((set, get) => ({
             await get().getDivisions();
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Failed to remove student" });
+            throw err;
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    deleteDivision: async (divisionId: string) => {
+        set({ loading: true, error: null });
+        try {
+            await api.delete("/div/delete", { data: { divisionId } });
+            const currentDivisions = get().divisions;
+            if (currentDivisions) {
+                set({ divisions: currentDivisions.filter(d => d.id !== divisionId) });
+            }
+        } catch (err: any) {
+            set({ error: err.response?.data?.message || "Failed to delete division" });
+            throw err;
         } finally {
             set({ loading: false });
         }

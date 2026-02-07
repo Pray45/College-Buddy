@@ -88,7 +88,8 @@ export const RegistrationHandler = async (req: Request, res: Response) => {
             const createStudent = {
                 userId: user.id,
                 enrollmentNo,
-                departmentId
+                departmentId,
+                semesterId : semester.toString()
             }
             await prisma.student.create({ data: createStudent })
 

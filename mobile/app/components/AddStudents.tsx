@@ -38,18 +38,26 @@ const AssignStudents = () => {
   const [selectedDivisionId, setSelectedDivisionId] = useState<string | null>(
     null,
   );
+  const [studentsLoaded, setStudentsLoaded] = useState(false);
 
   useEffect(() => {
     getDivisions();
   }, []);
 
+  // Reset students when department or semester changes
   useEffect(() => {
+    setStudentsLoaded(false);
+    setSelected([]);
+  }, [departmentId, semesterId]);
+
+  const handleLoadStudents = async () => {
     if (departmentId && semesterId) {
       const semester = parseInt(semesterId);
-      fetchStudents({ departmentId, semester });
+      await fetchStudents({ departmentId, semester });
+      setStudentsLoaded(true);
       setSelected([]);
     }
-  }, [departmentId, semesterId]);
+  };
 
   const toggleStudent = (id: string) => {
     setSelected((prev) =>
@@ -72,7 +80,7 @@ const AssignStudents = () => {
       setSelected([]);
       // Refetch students to update their assignment status
       if (departmentId && semesterId) {
-        fetchStudents({ departmentId, semester: parseInt(semesterId) });
+        await fetchStudents({ departmentId, semester: parseInt(semesterId) });
       }
     } catch {
       // error already handled in store
@@ -123,80 +131,132 @@ const AssignStudents = () => {
             </Picker>
           </View>
 
-          {/* Division Picker */}
-          <View className="bg-black/30 rounded-xl mb-4">
-            <Picker
-              selectedValue={selectedDivisionId}
-              onValueChange={(v) => setSelectedDivisionId(v)}
-            >
-              <Picker.Item label="Select Division" value={null} color="#9ca3af" />
-              {divisions?.map((d) => (
-                <Picker.Item
-                  key={d.id}
-                  label={`${d.name} (${d.departmentId})`}
-                  value={d.id}
-                  color="#9ca3af"
-                />
-              ))}
-            </Picker>
-          </View>
-
-          {/* Student List */}
-          <ScrollView className="max-h-80">
-            {loading && <ActivityIndicator />}
-
-            {error && (
-              <Text className="text-red-400 text-sm mb-3">{error}</Text>
-            )}
-
-            {!loading &&
-              students
-                ?.filter((student) => student.divisionId === null)
-                .map((student) => {
-                  const isSelected = selected.includes(student.id);
-                  const isAssigned = student.divisionId !== null;
-
-                  return (
-                    <TouchableOpacity
-                      key={student.id}
-                      onPress={() => toggleStudent(student.id)}
-                      className={`p-4 mb-3 rounded-xl border ${
-                        isSelected
-                          ? "bg-accent/20 border-accent"
-                          : "border-white/10"
-                      }`}
-                    >
-                      <Text className="text-white font-semibold">
-                        {student.User.name}
-                      </Text>
-                      <Text className="text-gray-400 text-sm">
-                        {student.enrollmentNo}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-
-            {!loading && students?.length === 0 && (
-              <Text className="text-gray-400 text-center mt-6">
-                No students found
-              </Text>
-            )}
-          </ScrollView>
-
-          {/* Assign Button */}
+          {/* Load Students Button */}
           <TouchableOpacity
-            disabled={selected.length === 0 || loading || !selectedDivisionId}
-            onPress={handleAssign}
-            className={`mt-5 p-4 rounded-xl ${
-              selected.length === 0 || !selectedDivisionId
+            disabled={!departmentId || !semesterId || loading}
+            onPress={handleLoadStudents}
+            className={`mb-4 p-4 rounded-xl ${
+              !departmentId || !semesterId
                 ? "bg-gray-600"
-                : "bg-accent"
+                : "bg-blue-600"
             }`}
           >
-            <Text className="text-white text-center font-semibold">
-              Assign Selected ({selected.length})
-            </Text>
+            {loading && !studentsLoaded ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-white text-center font-semibold">
+                Load Students from Selected Branch & Semester
+              </Text>
+            )}
           </TouchableOpacity>
+
+          {/* Student List - Only show after loading */}
+          {studentsLoaded && (
+            <>
+              {/* Division Picker */}
+              <View className="bg-black/30 rounded-xl mb-4">
+                <Picker
+                  selectedValue={selectedDivisionId}
+                  onValueChange={(v) => setSelectedDivisionId(v)}
+                >
+                  <Picker.Item label="Select Division to Assign" value={null} color="#9ca3af" />
+                  {divisions?.map((d) => (
+                    <Picker.Item
+                      key={d.id}
+                      label={`${d.name} (${d.departmentId})`}
+                      value={d.id}
+                      color="#9ca3af"
+                    />
+                  ))}
+                </Picker>
+              </View>
+
+              {/* Students Count */}
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-white font-semibold">
+                  Available Students ({students?.filter(s => s.divisionId === null).length || 0})
+                </Text>
+                {selected.length > 0 && (
+                  <Text className="text-accent text-sm">
+                    {selected.length} selected
+                  </Text>
+                )}
+              </View>
+
+              {/* Student List */}
+              <ScrollView className="max-h-80">
+                {loading && <ActivityIndicator />}
+
+                {error && (
+                  <Text className="text-red-400 text-sm mb-3">{error}</Text>
+                )}
+
+                {!loading &&
+                  students
+                    ?.filter((student) => student.divisionId === null)
+                    .map((student) => {
+                      const isSelected = selected.includes(student.id);
+
+                      return (
+                        <TouchableOpacity
+                          key={student.id}
+                          onPress={() => toggleStudent(student.id)}
+                          className={`p-4 mb-3 rounded-xl border ${
+                            isSelected
+                              ? "bg-accent/20 border-accent"
+                              : "border-white/10"
+                          }`}
+                        >
+                          <View className="flex-row justify-between items-center">
+                            <View>
+                              <Text className="text-white font-semibold">
+                                {student.User.name}
+                              </Text>
+                              <Text className="text-gray-400 text-sm">
+                                {student.enrollmentNo}
+                              </Text>
+                            </View>
+                            <View className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                              isSelected ? "bg-accent border-accent" : "border-gray-500"
+                            }`}>
+                              {isSelected && (
+                                <Text className="text-white text-xs">✓</Text>
+                              )}
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+
+                {!loading && students?.filter(s => s.divisionId === null).length === 0 && (
+                  <Text className="text-gray-400 text-center mt-6">
+                    No unassigned students found
+                  </Text>
+                )}
+              </ScrollView>
+
+              {/* Assign to Division Button */}
+              <TouchableOpacity
+                disabled={selected.length === 0 || loading || !selectedDivisionId}
+                onPress={handleAssign}
+                className={`mt-5 p-4 rounded-xl ${
+                  selected.length === 0 || !selectedDivisionId
+                    ? "bg-gray-600"
+                    : "bg-green-600"
+                }`}
+              >
+                <Text className="text-white text-center font-semibold">
+                  {loading ? "Assigning..." : `Assign ${selected.length} Student(s) to Division`}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {!studentsLoaded && departmentId && semesterId && (
+            <Text className="text-gray-400 text-center mt-4">
+              Click &quot;Load Students&quot; to view available students
+            </Text>
+          )}
         </View>
       )}
     </ScrollView>
