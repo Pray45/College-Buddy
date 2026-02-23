@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'rea
 import React from 'react'
 import { useAuthStore } from '@/src/store/authStore';
 import {useRequestStore} from "@/src/store/requestStore";
+import colors from '@/src/config/colors';
 
 const RequestHandle = () => {
     const getRequests = useRequestStore((state) => state.getRequests);
@@ -67,14 +68,14 @@ const RequestHandle = () => {
                 </View>
 
                 {error && (
-                    <View className='bg-red-900/20 border border-red-500 rounded-lg p-4 mb-4'>
-                        <Text className='text-red-300 text-sm'>{error}</Text>
+                    <View className='bg-dangerMuted border border-danger rounded-lg p-4 mb-4'>
+                        <Text className='text-dangerText text-sm'>{error}</Text>
                     </View>
                 )}
 
                 {loading && (
                     <View className='flex-1 justify-center items-center py-10'>
-                        <ActivityIndicator size="large" color="#00FF88" />
+                        <ActivityIndicator size="large" color={colors.accentBright} />
                     </View>
                 )}
 

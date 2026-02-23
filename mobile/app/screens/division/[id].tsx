@@ -4,6 +4,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useDivisionStore } from "@/src/store/divisionStore";
 import { useAuthStore } from "@/src/store/authStore";
+import colors from "@/src/config/colors";
 
 const DEPARTMENT_MAP: Record<string, string> = {
     "1": "CSE",
@@ -45,8 +46,8 @@ const DivisionDetails = () => {
     if (loading && !division) {
         return (
             <View className="flex-1 bg-primary px-5 py-6 justify-center items-center">
-                <ActivityIndicator color="#00FF88" size="large" />
-                <Text className="text-gray-400 mt-4">Loading division...</Text>
+                <ActivityIndicator color={colors.accentBright} size="large" />
+                <Text className="text-textMuted mt-4">Loading division...</Text>
             </View>
         );
     }
@@ -58,10 +59,10 @@ const DivisionDetails = () => {
                     onPress={() => router.back()}
                     className="w-10 h-10 rounded-full bg-secondary items-center justify-center border border-white/10"
                 >
-                    <Ionicons name="arrow-back" size={20} color="white" />
+                    <Ionicons name="arrow-back" size={20} color={colors.textWhite} />
                 </TouchableOpacity>
                 <Text className="text-white text-xl font-semibold">Division not found</Text>
-                <Text className="text-gray-400">Try refreshing divisions and open again.</Text>
+                <Text className="text-textMuted">Try refreshing divisions and open again.</Text>
             </View>
         );
     }
@@ -74,10 +75,10 @@ const DivisionDetails = () => {
                 onPress={() => router.replace("/(admin)/divisionHandler")}
                 className="mb-5 w-11 h-11 rounded-full bg-secondary items-center justify-center border border-white/10"
             >
-                <Ionicons name="arrow-back" size={20} color="white" />
+                <Ionicons name="arrow-back" size={20} color={colors.textWhite} />
             </TouchableOpacity>
 
-            <View className="bg-gradient-to-br from-[#111827] to-[#0f172a] p-6 rounded-3xl border border-white/10 shadow-md shadow-black/40 mb-4">
+            <View className="bg-gradient-to-br from-gradientFrom to-gradientTo p-6 rounded-3xl border border-white/10 shadow-md shadow-black/40 mb-4">
                 <Text className="text-white text-3xl font-extrabold mb-2">Division {division.name}</Text>
                 
                 <View className="mt-6 flex-row gap-3 flex-wrap">
@@ -85,10 +86,10 @@ const DivisionDetails = () => {
                         <Text className="text-accent text-sm font-semibold">{students.length} Students</Text>
                     </View>
                     <View className="bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                        <Text className="text-gray-200 text-sm font-semibold">Dept: {departmentName || division.departmentId}</Text>
+                        <Text className="text-textLight text-sm font-semibold">Dept: {departmentName || division.departmentId}</Text>
                     </View>
                     <View className="bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                        <Text className="text-gray-200 text-sm font-semibold">Semester {division.semesterId}</Text>
+                        <Text className="text-textLight text-sm font-semibold">Semester {division.semesterId}</Text>
                     </View>
                 </View>
             </View>
@@ -117,13 +118,13 @@ const DivisionDetails = () => {
                             ]
                         );
                     }}
-                    className="bg-red-500/10 p-4 rounded-2xl border border-red-500/30 mb-4 flex-row items-center justify-between"
+                    className="bg-danger/10 p-4 rounded-2xl border border-danger/30 mb-4 flex-row items-center justify-between"
                 >
                     <View>
-                        <Text className="text-red-500 font-semibold text-base">Delete Division</Text>
-                        <Text className="text-red-400/70 text-xs mt-1">This will unassign all students</Text>
+                        <Text className="text-danger font-semibold text-base">Delete Division</Text>
+                        <Text className="text-dangerText/70 text-xs mt-1">This will unassign all students</Text>
                     </View>
-                    <Ionicons name="trash" size={24} color="#ef4444" />
+                    <Ionicons name="trash" size={24} color={colors.danger} />
                 </TouchableOpacity>
             )}
 
@@ -131,12 +132,12 @@ const DivisionDetails = () => {
                 <View className="flex-row items-center justify-between mb-3">
                     <Text className="text-white text-lg font-semibold">Students</Text>
                     <View className="bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                        <Text className="text-gray-200 text-xs">List updates live</Text>
+                        <Text className="text-textLight text-xs">List updates live</Text>
                     </View>
                 </View>
 
                 {students.length === 0 && (
-                    <Text className="text-gray-400">No students assigned to this division yet.</Text>
+                    <Text className="text-textMuted">No students assigned to this division yet.</Text>
                 )}
 
                 {students.map((student) => (
@@ -146,7 +147,7 @@ const DivisionDetails = () => {
                     >
                         <View className="flex-1">
                             <Text className="text-white font-semibold">{student.User?.name ?? "Unnamed"}</Text>
-                            <Text className="text-gray-400 text-sm">{student.User?.email ?? "No email"}</Text>
+                            <Text className="text-textMuted text-sm">{student.User?.email ?? "No email"}</Text>
                         </View>
                         <View className="flex-row items-center gap-2">
                             <View className="bg-accent/20 px-3 py-1 rounded-full border border-accent/40">
@@ -182,12 +183,12 @@ const DivisionDetails = () => {
                                         );
                                     }}
                                     disabled={deletingStudent === student.id}
-                                    className="bg-red-500/20 p-2 rounded-lg border border-red-500/40"
+                                    className="bg-danger/20 p-2 rounded-lg border border-danger/40"
                                 >
                                     {deletingStudent === student.id ? (
-                                        <ActivityIndicator size="small" color="#ef4444" />
+                                        <ActivityIndicator size="small" color={colors.danger} />
                                     ) : (
-                                        <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                                        <Ionicons name="trash-outline" size={16} color={colors.danger} />
                                     )}
                                 </TouchableOpacity>
                             )}

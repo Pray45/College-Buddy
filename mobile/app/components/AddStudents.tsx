@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { Picker } from "@react-native-picker/picker";
 import { useDivisionStore } from "@/src/store/divisionStore";
+import colors from "@/src/config/colors";
 
 const DEPARTMENTS = [
   { label: "CSE", value: "1" },
@@ -97,7 +98,7 @@ const AssignStudents = () => {
         <Text className="text-white text-lg font-semibold">
           Assign Students to Division
         </Text>
-        <Text className="text-gray-400 text-sm mt-1">
+        <Text className="text-textMuted text-sm mt-1">
           Select students and assign them to a division
         </Text>
       </TouchableOpacity>
@@ -111,9 +112,9 @@ const AssignStudents = () => {
               selectedValue={departmentId}
               onValueChange={(v) => setDepartmentId(v)}
             >
-              <Picker.Item label="Select Department" value={null} color="#9ca3af" />
+              <Picker.Item label="Select Department" value={null} color={colors.textMuted} />
               {DEPARTMENTS.map((d) => (
-                <Picker.Item key={d.value} label={d.label} value={d.value} color="#9ca3af"/>
+                <Picker.Item key={d.value} label={d.label} value={d.value} color={colors.textMuted}/>
               ))}
             </Picker>
           </View>
@@ -124,9 +125,9 @@ const AssignStudents = () => {
               selectedValue={semesterId}
               onValueChange={(v) => setSemesterId(v)}
             >
-              <Picker.Item label="Select Semester" value={null} color="#9ca3af" />
+              <Picker.Item label="Select Semester" value={null} color={colors.textMuted} />
               {SEMESTERS.map((s) => (
-                <Picker.Item key={s} label={`Semester ${s}`} value={s} color="#9ca3af" />
+                <Picker.Item key={s} label={`Semester ${s}`} value={s} color={colors.textMuted} />
               ))}
             </Picker>
           </View>
@@ -137,12 +138,12 @@ const AssignStudents = () => {
             onPress={handleLoadStudents}
             className={`mb-4 p-4 rounded-xl ${
               !departmentId || !semesterId
-                ? "bg-gray-600"
-                : "bg-blue-600"
+                ? "bg-disabled"
+                : "bg-info"
             }`}
           >
             {loading && !studentsLoaded ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.textWhite} />
             ) : (
               <Text className="text-white text-center font-semibold">
                 Load Students from Selected Branch & Semester
@@ -159,13 +160,13 @@ const AssignStudents = () => {
                   selectedValue={selectedDivisionId}
                   onValueChange={(v) => setSelectedDivisionId(v)}
                 >
-                  <Picker.Item label="Select Division to Assign" value={null} color="#9ca3af" />
+                  <Picker.Item label="Select Division to Assign" value={null} color={colors.textMuted} />
                   {divisions?.map((d) => (
                     <Picker.Item
                       key={d.id}
                       label={`${d.name} (${d.departmentId})`}
                       value={d.id}
-                      color="#9ca3af"
+                      color={colors.textMuted}
                     />
                   ))}
                 </Picker>
@@ -188,7 +189,7 @@ const AssignStudents = () => {
                 {loading && <ActivityIndicator />}
 
                 {error && (
-                  <Text className="text-red-400 text-sm mb-3">{error}</Text>
+                  <Text className="text-dangerText text-sm mb-3">{error}</Text>
                 )}
 
                 {!loading &&
@@ -212,12 +213,12 @@ const AssignStudents = () => {
                               <Text className="text-white font-semibold">
                                 {student.User.name}
                               </Text>
-                              <Text className="text-gray-400 text-sm">
+                              <Text className="text-textMuted text-sm">
                                 {student.enrollmentNo}
                               </Text>
                             </View>
                             <View className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                              isSelected ? "bg-accent border-accent" : "border-gray-500"
+                              isSelected ? "bg-accent border-accent" : "border-disabled"
                             }`}>
                               {isSelected && (
                                 <Text className="text-white text-xs">✓</Text>
@@ -229,7 +230,7 @@ const AssignStudents = () => {
                     })}
 
                 {!loading && students?.filter(s => s.divisionId === null).length === 0 && (
-                  <Text className="text-gray-400 text-center mt-6">
+                  <Text className="text-textMuted text-center mt-6">
                     No unassigned students found
                   </Text>
                 )}
@@ -241,8 +242,8 @@ const AssignStudents = () => {
                 onPress={handleAssign}
                 className={`mt-5 p-4 rounded-xl ${
                   selected.length === 0 || !selectedDivisionId
-                    ? "bg-gray-600"
-                    : "bg-green-600"
+                    ? "bg-disabled"
+                    : "bg-success"
                 }`}
               >
                 <Text className="text-white text-center font-semibold">
@@ -253,7 +254,7 @@ const AssignStudents = () => {
           )}
 
           {!studentsLoaded && departmentId && semesterId && (
-            <Text className="text-gray-400 text-center mt-4">
+            <Text className="text-textMuted text-center mt-4">
               Click &quot;Load Students&quot; to view available students
             </Text>
           )}

@@ -1,13 +1,14 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import Ionicons from '@expo/vector-icons/build/Ionicons'
+import colors from '../../src/config/colors'
 
 const UpcomingEvents = ({events} : {events: Array<{title: string, day: string, month: string, location: string}>}) => {
     return (
         <>
             <View className="mx-5 mt-10 flex-row justify-between px-5">
                 <View className="flex-row items-center gap-3">
-                    <Ionicons name="calendar-outline" size={24} color="white" />
+                    <Ionicons name="calendar-outline" size={24} color={colors.textWhite} />
                     <Text className="text-textTheme text-2xl font-semibold">
                         Upcoming Events
                     </Text>
@@ -39,7 +40,7 @@ const UpcomingEvents = ({events} : {events: Array<{title: string, day: string, m
 
 
                             {index < events.slice(0, 3).length - 1 && (
-                                <View className="mx-5 border-b border-[#29313C]" />
+                                <View className="mx-5 border-b border-border" />
                             )}
                         </View>
                     )) : (

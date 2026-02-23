@@ -35,7 +35,7 @@ const RecentUpdates = () => {
                                         <Text className="mt-2 text-textSecondary text-sm">{update.description}</Text>
                                     </TouchableOpacity>
                                     {index < visible.length - 1 && (
-                                        <View className="mx-5 border-b border-[#29313C]" />
+                                        <View className="mx-5 border-b border-border" />
                                     )}
                                 </View>
                             ));

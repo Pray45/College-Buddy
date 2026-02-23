@@ -1,12 +1,13 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import colors from "../../src/config/colors";
 
 export default function AdminTabs() {
     return (
         <Tabs screenOptions={
             { headerShown: false,
               tabBarStyle: {
-                  backgroundColor: '#161B22',
+                  backgroundColor: colors.secondary,
                   justifyContent: 'center',
                   alignItems: 'center',
                   height: 70,

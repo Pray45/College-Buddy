@@ -2,6 +2,7 @@ import React from 'react'
 import { Redirect, Tabs, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../../src/store/authStore';
+import colors from '../../src/config/colors';
 
 const TabsLayout = () => {
 
@@ -19,7 +20,7 @@ const TabsLayout = () => {
   return (
     <Tabs screenOptions={{
       tabBarStyle: {
-        backgroundColor: '#161B22',
+        backgroundColor: colors.secondary,
         justifyContent: 'center',
         alignItems: 'center',
         height: 70,
@@ -29,8 +30,8 @@ const TabsLayout = () => {
       <Tabs.Screen name="index" options={{
         title: 'Home',
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#00FF88',
-        tabBarInactiveTintColor: '#A0A0A0',
+        tabBarActiveTintColor: colors.accentBright,
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarIcon: ({ color }) => (<Ionicons name="home" size={24} color={color} />)
       }}
@@ -38,8 +39,8 @@ const TabsLayout = () => {
       <Tabs.Screen name="student" options={{
         title: 'Student',
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#00FF88',
-        tabBarInactiveTintColor: '#A0A0A0',
+        tabBarActiveTintColor: colors.accentBright,
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarIcon: ({ color }) => (<Ionicons name="book" size={24} color={color} />)
       }}
@@ -47,8 +48,8 @@ const TabsLayout = () => {
       <Tabs.Screen name="project" options={{
         title: 'Project',
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#00FF88',
-        tabBarInactiveTintColor: '#A0A0A0',
+        tabBarActiveTintColor: colors.accentBright,
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarIcon: ({ color }) => (<Ionicons name="code" size={24} color={color} />)
       }}
@@ -56,8 +57,8 @@ const TabsLayout = () => {
       <Tabs.Screen name="GECP" options={{
         title: 'GECP',
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#00FF88',
-        tabBarInactiveTintColor: '#A0A0A0',
+        tabBarActiveTintColor: colors.accentBright,
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarIcon: ({ color }) => (<Ionicons name="school" size={24} color={color} />)
       }}
@@ -66,8 +67,8 @@ const TabsLayout = () => {
         tabBarBadge: 3,
         title: 'Notifications',
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#00FF88',
-        tabBarInactiveTintColor: '#A0A0A0',
+        tabBarActiveTintColor: colors.accentBright,
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarIcon: ({ color }) => (<Ionicons name="notifications" size={24} color={color} />),
       }}

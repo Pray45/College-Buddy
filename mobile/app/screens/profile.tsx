@@ -3,6 +3,7 @@ import React, { useMemo } from 'react'
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
 import { Ionicons } from '@expo/vector-icons';
+import colors from '../../src/config/colors';
 
 const Profile = () => {
 
@@ -55,7 +56,7 @@ const Profile = () => {
                 {userData.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </Text>
             ) : (
-              <Ionicons name="person" size={48} color="white" />
+              <Ionicons name="person" size={48} color={colors.textWhite} />
             )}
           </View>
           <Text className='text-white text-2xl font-bold'>
@@ -74,27 +75,27 @@ const Profile = () => {
         <Text className='text-textPrimary text-lg ml-1.5 font-bold'>Basic Information</Text>
         <View className='bg-secondary rounded-xl p-4 mt-3 mb-5'>
           <View className='flex-row items-center mb-4'>
-            <Ionicons className='p-2 bg-accent rounded-lg' name="person-outline" size={20} color="white" />
+            <Ionicons className='p-2 bg-accent rounded-lg' name="person-outline" size={20} color={colors.textWhite} />
             <View className='flex-1 ml-3'>
               <Text className='text-textSecondary text-xs'>Role</Text>
               <Text className='text-textPrimary font-semibold'>{userData?.role || 'Not provided'}</Text>
             </View>
           </View>
           
-          <View className="mx-0 border-b border-[#29313C]" />
+          <View className="mx-0 border-b border-border" />
           
           <View className='flex-row items-center my-4'>
-            <Ionicons className='p-2 bg-accent rounded-lg' name="shield-checkmark-outline" size={20} color="white" />
+            <Ionicons className='p-2 bg-accent rounded-lg' name="shield-checkmark-outline" size={20} color={colors.textWhite} />
             <View className='flex-1 ml-3'>
               <Text className='text-textSecondary text-xs'>Verification Status</Text>
               <Text className='text-textPrimary font-semibold'>{userData?.verificationStatus || 'PENDING'}</Text>
             </View>
           </View>
 
-          <View className="mx-0 border-b border-[#29313C]" />
+          <View className="mx-0 border-b border-border" />
 
           <View className='flex-row items-center mt-4'>
-            <Ionicons className='p-2 bg-accent rounded-lg' name="business-outline" size={20} color="white" />
+            <Ionicons className='p-2 bg-accent rounded-lg' name="business-outline" size={20} color={colors.textWhite} />
             <View className='flex-1 ml-3'>
               <Text className='text-textSecondary text-xs'>Department</Text>
               <Text className='text-textPrimary font-semibold'>{userData?.department || 'Not provided'}</Text>
@@ -109,27 +110,27 @@ const Profile = () => {
             <Text className='text-textPrimary text-lg ml-1.5 font-bold'>Academic Details</Text>
             <View className='bg-secondary rounded-xl p-4 mt-3 mb-5'>
               <View className='flex-row items-center mb-4'>
-                <Ionicons className='p-2 bg-accent rounded-lg' name="school-outline" size={20} color="white" />
+                <Ionicons className='p-2 bg-accent rounded-lg' name="school-outline" size={20} color={colors.textWhite} />
                 <View className='flex-1 ml-3'>
                   <Text className='text-textSecondary text-xs'>Enrollment Number</Text>
                   <Text className='text-textPrimary font-semibold'>{userData.enrollmentNo || 'Not provided'}</Text>
                 </View>
               </View>
 
-              <View className="mx-0 border-b border-[#29313C]" />
+              <View className="mx-0 border-b border-border" />
 
               <View className='flex-row items-center my-4'>
-                <Ionicons className='p-2 bg-accent rounded-lg' name="layers-outline" size={20} color="white" />
+                <Ionicons className='p-2 bg-accent rounded-lg' name="layers-outline" size={20} color={colors.textWhite} />
                 <View className='flex-1 ml-3'>
                   <Text className='text-textSecondary text-xs'>Semester</Text>
                   <Text className='text-textPrimary font-semibold'>{userData.semester || 'Not assigned'}</Text>
                 </View>
               </View>
 
-              <View className="mx-0 border-b border-[#29313C]" />
+              <View className="mx-0 border-b border-border" />
 
               <View className='flex-row items-center my-4'>
-                <Ionicons className='p-2 bg-accent rounded-lg' name="git-branch-outline" size={20} color="white" />
+                <Ionicons className='p-2 bg-accent rounded-lg' name="git-branch-outline" size={20} color={colors.textWhite} />
                 <View className='flex-1 ml-3'>
                   <Text className='text-textSecondary text-xs'>Division</Text>
                   <Text className='text-textPrimary font-semibold'>{userData.division || 'Not assigned'}</Text>
@@ -138,9 +139,9 @@ const Profile = () => {
 
               {userData.subjects && userData.subjects.length > 0 && (
                 <>
-                  <View className="mx-0 border-b border-[#29313C]" />
+                  <View className="mx-0 border-b border-border" />
                   <View className='flex-row items-start my-4'>
-                    <Ionicons className='p-2 bg-accent rounded-lg' name="book-outline" size={20} color="white" />
+                    <Ionicons className='p-2 bg-accent rounded-lg' name="book-outline" size={20} color={colors.textWhite} />
                     <View className='flex-1 ml-3'>
                       <Text className='text-textSecondary text-xs'>Subjects ({userData.subjects.length})</Text>
                       {userData.subjects.map((subject: string, idx: number) => (
@@ -155,9 +156,9 @@ const Profile = () => {
 
               {userData.savednotes && userData.savednotes.length > 0 && (
                 <>
-                  <View className="mx-0 border-b border-[#29313C]" />
+                  <View className="mx-0 border-b border-border" />
                   <View className='flex-row items-center mt-4'>
-                    <Ionicons className='p-2 bg-accent rounded-lg' name="bookmark-outline" size={20} color="white" />
+                    <Ionicons className='p-2 bg-accent rounded-lg' name="bookmark-outline" size={20} color={colors.textWhite} />
                     <View className='flex-1 ml-3'>
                       <Text className='text-textSecondary text-xs'>Saved Notes</Text>
                       <Text className='text-textPrimary font-semibold'>{userData.savednotes.length} notes</Text>
@@ -176,17 +177,17 @@ const Profile = () => {
             <Text className='text-textPrimary text-lg ml-1.5 font-bold'>Professional Details</Text>
             <View className='bg-secondary rounded-xl p-4 mt-3 mb-5'>
               <View className='flex-row items-center mb-4'>
-                <Ionicons className='p-2 bg-accent rounded-lg' name="card-outline" size={20} color="white" />
+                <Ionicons className='p-2 bg-accent rounded-lg' name="card-outline" size={20} color={colors.textWhite} />
                 <View className='flex-1 ml-3'>
                   <Text className='text-textSecondary text-xs'>Teacher ID</Text>
                   <Text className='text-textPrimary font-semibold'>{userData.teacherId || 'Not provided'}</Text>
                 </View>
               </View>
 
-              <View className="mx-0 border-b border-[#29313C]" />
+              <View className="mx-0 border-b border-border" />
 
               <View className='flex-row items-center mt-4'>
-                <Ionicons className='p-2 bg-accent rounded-lg' name="briefcase-outline" size={20} color="white" />
+                <Ionicons className='p-2 bg-accent rounded-lg' name="briefcase-outline" size={20} color={colors.textWhite} />
                 <View className='flex-1 ml-3'>
                   <Text className='text-textSecondary text-xs'>Position</Text>
                   <Text className='text-textPrimary font-semibold'>{userData.position || 'Not assigned'}</Text>
@@ -215,9 +216,9 @@ const Profile = () => {
         {/* Logout Button */}
         <TouchableOpacity
           onPress={handleLogout}
-          className='bg-red-500 mt-8 px-6 py-4 rounded-xl flex-row items-center mb-5 justify-center'
+          className='bg-danger mt-8 px-6 py-4 rounded-xl flex-row items-center mb-5 justify-center'
         >
-          <Ionicons name="log-out-outline" size={24} color="white" />
+          <Ionicons name="log-out-outline" size={24} color={colors.textWhite} />
           <Text className='text-white text-lg font-bold ml-2'>Log Out</Text>
         </TouchableOpacity>
 

@@ -183,7 +183,7 @@ const Register = () => {
 
         <View className="flex-1 bg-white rounded-t-3xl p-6">
           {/* Tab Switcher */}
-          <View className="bg-gray-100 rounded-2xl p-1 flex-row w-full mx-auto">
+          <View className="bg-surfaceLight rounded-2xl p-1 flex-row w-full mx-auto">
             <TouchableOpacity
               onPress={() => router.push("/(auth)/log-in")}
               className="flex-1 py-3 rounded-2xl items-center"
@@ -209,7 +209,7 @@ const Register = () => {
             />
             {/* Role Picker */}
             <Text className="text-sm text-black mb-2 font-bold">Role</Text>
-            <View className="bg-[#F3F4F6] rounded-md mb-4">
+            <View className="bg-surfaceLight rounded-md mb-4">
               <Picker selectedValue={role} onValueChange={handleRoleChange}>
                 <Picker.Item label="Student" value="STUDENT" />
                 <Picker.Item label="Professor" value="PROFESSOR" />
@@ -227,10 +227,10 @@ const Register = () => {
               }}
               placeholder="John Doe"
               autoCapitalize="words"
-              className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
+              className="bg-surfaceLight px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
             {errors.name && (
-              <Text className="text-red-500 text-xs mb-3">{errors.name}</Text>
+              <Text className="text-danger text-xs mb-3">{errors.name}</Text>
             )}
             {!errors.name && <View className="mb-3" />}
 
@@ -248,10 +248,10 @@ const Register = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
-              className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
+              className="bg-surfaceLight px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
             {errors.email && (
-              <Text className="text-red-500 text-xs mb-3">{errors.email}</Text>
+              <Text className="text-danger text-xs mb-3">{errors.email}</Text>
             )}
             {!errors.email && <View className="mb-3" />}
 
@@ -259,7 +259,7 @@ const Register = () => {
             <Text className="text-sm text-black mb-2 font-bold">
               Department
             </Text>
-            <View className="bg-[#F3F4F6] rounded-md mb-4">
+            <View className="bg-surfaceLight rounded-md mb-4">
               <Picker
                 selectedValue={department}
                 onValueChange={(value: any) =>
@@ -291,10 +291,10 @@ const Register = () => {
                   }}
                   placeholder="Enter enrollment number"
                   keyboardType="number-pad"
-                  className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
+                  className="bg-surfaceLight px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
                 />
                 {errors.enrollment && (
-                  <Text className="text-red-500 text-xs mb-3">
+                  <Text className="text-danger text-xs mb-3">
                     {errors.enrollment}
                   </Text>
                 )}
@@ -303,7 +303,7 @@ const Register = () => {
                 <Text className="text-sm text-black mb-2 font-bold">
                   Semester
                 </Text>
-                <View className="bg-[#F3F4F6] rounded-md mb-4">
+                <View className="bg-surfaceLight rounded-md mb-4">
                   <Picker
                     selectedValue={semester}
                     onValueChange={(value: any) =>
@@ -334,10 +334,10 @@ const Register = () => {
                   }}
                   placeholder="Enter employee ID"
                   keyboardType="number-pad"
-                  className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
+                  className="bg-surfaceLight px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
                 />
                 {errors.teacherId && (
-                  <Text className="text-red-500 text-xs mb-3">
+                  <Text className="text-danger text-xs mb-3">
                     {errors.teacherId}
                   </Text>
                 )}
@@ -357,10 +357,10 @@ const Register = () => {
               placeholder="••••••••"
               secureTextEntry
               autoCapitalize="none"
-              className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
+              className="bg-surfaceLight px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
             {errors.password && (
-              <Text className="text-red-500 text-xs mb-3">
+              <Text className="text-danger text-xs mb-3">
                 {errors.password}
               </Text>
             )}
@@ -380,10 +380,10 @@ const Register = () => {
               placeholder="••••••••"
               secureTextEntry
               autoCapitalize="none"
-              className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
+              className="bg-surfaceLight px-4 h-12 rounded-md mb-1 placeholder:text-textSecondary"
             />
             {errors.confirm && (
-              <Text className="text-red-500 text-xs mb-3">
+              <Text className="text-danger text-xs mb-3">
                 {errors.confirm}
               </Text>
             )}

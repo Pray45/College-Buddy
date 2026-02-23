@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Picker } from "@react-native-picker/picker";
 import {useDivisionStore} from "@/src/store/divisionStore";
 import Toast from "react-native-toast-message"
+import colors from "@/src/config/colors";
 
 const DEPARTMENTS = [
     { label: "Computer Science & Engineering", value: 1 },
@@ -77,7 +78,7 @@ const CreateDivision = () => {
                 <Text className="text-white text-lg font-semibold">
                     Create Division
                 </Text>
-                <Text className="text-gray-400 text-sm mt-1">
+                <Text className="text-textMuted text-sm mt-1">
                     Add a new division for students
                 </Text>
             </TouchableOpacity>
@@ -92,20 +93,20 @@ const CreateDivision = () => {
                         value={name}
                         onChangeText={setName}
                         placeholder="Division Name"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         autoCapitalize="characters"
-                        className="bg-zinc-800 px-4 h-12 rounded-md mb-4 text-white"
+                        className="bg-surface px-4 h-12 rounded-md mb-4 text-white"
                     />
 
                     <Text className="text-white text-sm font-semibold mb-2">
                         Department
                     </Text>
-                    <View className="bg-zinc-800 rounded-md mb-4 overflow-hidden">
+                    <View className="bg-surface rounded-md mb-4 overflow-hidden">
                         <Picker
                             selectedValue={department}
                             onValueChange={(value) => setDepartment(value)}
                         >
-                            <Picker.Item label="Select Department" value={null} color="#9ca3af"    />
+                            <Picker.Item label="Select Department" value={null} color={colors.textMuted}    />
                             {DEPARTMENTS.map((dept) => (
                                 <Picker.Item
                                     key={dept.value}
@@ -119,12 +120,12 @@ const CreateDivision = () => {
                     <Text className="text-white text-sm font-semibold mb-2">
                         Semester
                     </Text>
-                    <View className="bg-zinc-800 rounded-md mb-4 overflow-hidden">
+                    <View className="bg-surface rounded-md mb-4 overflow-hidden">
                         <Picker
                             selectedValue={semester}
                             onValueChange={(value) => setSemester(value)}
                         >
-                            <Picker.Item label="Select Semester" value={null} color="#9ca3af"    />
+                            <Picker.Item label="Select Semester" value={null} color={colors.textMuted}    />
                             {SEMESTERS.map((sem) => (
                                 <Picker.Item
                                     key={sem.value}

@@ -187,3 +187,70 @@ export const deleteSubjectHanlder = async (req: Request, res: Response) => {
     }
 
 };
+
+export const getSubjectDetailsHandler = async (req: Request, res: Response) => {
+    try {
+        const { subjectId } = req.params as { subjectId?: string };
+
+        if (!subjectId) {
+            CreateError(400, "Subject ID is required", "getSubjectDetailsHandler");
+        }
+
+        const subject = await prisma.subject.findUnique({
+            where: { id: subjectId },
+            include: {
+                department: { select: { id: true, name: true } },
+                semester: { select: { id: true, number: true } },
+                DivisionSubjectAssignment: {
+                    include: {
+                        Division: {
+                            select: {
+                                id: true,
+                                name: true,
+                                semesterId: true,
+                                departmentId: true,
+                            },
+                        },
+                        Professor: {
+                            include: {
+                                User: { select: { id: true, name: true, email: true } },
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: "desc" },
+                },
+                StudentSubject: {
+                    include: {
+                        Student: {
+                            select: {
+                                id: true,
+                                enrollmentNo: true,
+                                divisionId: true,
+                                User: { select: { id: true, name: true, email: true } },
+                                Division: { select: { id: true, name: true } },
+                            },
+                        },
+                    },
+                    orderBy: { enrolledAt: "desc" },
+                },
+            },
+        });
+
+        if (!subject) {
+            CreateError(404, "Subject not found", "getSubjectDetailsHandler");
+        }
+
+        res.status(200).json({
+            result: true,
+            message: "Subject details fetched successfully",
+            data: { subject },
+        });
+    } catch (error) {
+        console.error("error in get subject details", error);
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in get subject details handler",
+            error,
+        });
+    }
+};

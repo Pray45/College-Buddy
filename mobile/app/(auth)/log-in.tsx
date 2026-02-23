@@ -70,7 +70,7 @@ const Login = () => {
 
                 {/* Card */}
                 <View className="flex-1 bg-white rounded-t-3xl p-6">
-                    <View className="bg-gray-100 rounded-2xl p-1 flex-row w-full mx-auto">
+                    <View className="bg-surfaceLight rounded-2xl p-1 flex-row w-full mx-auto">
                         <TouchableOpacity onPress={() => router.push('/(auth)/log-in')} className="flex-1 py-3 rounded-2xl bg-white items-center">
                             <Text className="text-lg font-semibold text-textPrimary">Log In</Text>
                         </TouchableOpacity>
@@ -81,30 +81,30 @@ const Login = () => {
 
                     <View className="mt-6">
                         <Text className="text-sm text-black font-bold mb-2">Email address</Text>
-                        <TextInput value={email} onChangeText={setEmail} placeholder="example@gmail.com" keyboardType="email-address" autoCapitalize="none" className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
+                        <TextInput value={email} onChangeText={setEmail} placeholder="example@gmail.com" keyboardType="email-address" autoCapitalize="none" className="bg-surfaceLight px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
 
                         <Text className="text-sm text-black font-bold mb-2">Password</Text>
-                        <TextInput value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry className="bg-[#F3F4F6] px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
+                        <TextInput value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry className="bg-surfaceLight px-4 h-12 rounded-md mb-4 placeholder:text-textSecondary" />
 
                         <Text className="text-sm text-black font-bold mb-2">Role</Text>
                         <View className="flex-row mb-4">
-                            <TouchableOpacity onPress={() => setRole('STUDENT')} className={`flex-1 h-10 rounded-md items-center justify-center mr-2 ${role === 'STUDENT' ? 'bg-textPrimary' : 'bg-[#F3F4F6]'}`}>
+                            <TouchableOpacity onPress={() => setRole('STUDENT')} className={`flex-1 h-10 rounded-md items-center justify-center mr-2 ${role === 'STUDENT' ? 'bg-textPrimary' : 'bg-surfaceLight'}`}>
                                 <Text className={`${role === 'STUDENT' ? 'text-primary font-bold' : 'text-textSecondary'}`}>STUDENT</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setRole('HOD')} className={`flex-1 h-10 rounded-md items-center justify-center mr-2 ${role === 'HOD' ? 'bg-textPrimary' : 'bg-[#F3F4F6]'}`}>
+                            <TouchableOpacity onPress={() => setRole('HOD')} className={`flex-1 h-10 rounded-md items-center justify-center mr-2 ${role === 'HOD' ? 'bg-textPrimary' : 'bg-surfaceLight'}`}>
                                 <Text className={`${role === 'HOD' ? 'text-primary font-bold' : 'text-textSecondary'}`}>HOD</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setRole('PROFESSOR')} className={`flex-1 h-10 rounded-md items-center justify-center ${role === 'PROFESSOR' ? 'bg-textPrimary' : 'bg-[#F3F4F6]'}`}>
+                            <TouchableOpacity onPress={() => setRole('PROFESSOR')} className={`flex-1 h-10 rounded-md items-center justify-center ${role === 'PROFESSOR' ? 'bg-textPrimary' : 'bg-surfaceLight'}`}>
                                 <Text className={`${role === 'PROFESSOR' ? 'text-primary font-bold' : 'text-textSecondary'}`}>PROFESSOR</Text>
                             </TouchableOpacity>
                         </View>
 
                         {verificationMessage && (
-                            <View className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 mb-4">
-                                <Text className="text-yellow-800 text-sm font-medium">{verificationMessage}</Text>
+                            <View className="bg-warningLight border border-warningBorder rounded-lg p-4 mb-4">
+                                <Text className="text-warningText text-sm font-medium">{verificationMessage}</Text>
                                 <TouchableOpacity 
                                     onPress={logout}
-                                    className="bg-yellow-600 mt-3 h-10 rounded-md items-center justify-center"
+                                    className="bg-warning mt-3 h-10 rounded-md items-center justify-center"
                                 >
                                     <Text className="text-white font-bold">Logout</Text>
                                 </TouchableOpacity>

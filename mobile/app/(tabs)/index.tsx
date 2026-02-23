@@ -6,6 +6,7 @@ import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 import UpcomingEvents from "../components/UpcomingEvents";
 import { Redirect, useRouter } from "expo-router";
 import { useAuthStore } from "../../src/store/authStore";
+import colors from "../../src/config/colors";
 
 export default function App() {
 
@@ -53,7 +54,7 @@ export default function App() {
 
       <View className="mt-16 flex-row justify-between px-5">
         <View className="flex-row items-center gap-3">
-          <Ionicons name="time-outline" size={28} color="white" />
+          <Ionicons name="time-outline" size={28} color={colors.textWhite} />
           <Text className="text-textTheme text-2xl font-semibold">
             Recent updates
           </Text>

@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { assignStudentsHandler, createDivisionHandler, deleteDivisionHandler, getDivisionHandler, getStudents, getStudentsOfSemesterHandler, removeStudentHandler } from '../controller/division.controller';
+import { assignStudentsHandler, createDivisionHandler, deleteDivisionHandler, getDivisionHandler, getProfessorsByDepartmentHandler, getStudents, getStudentsOfSemesterHandler, removeStudentHandler } from '../controller/division.controller';
 import { requireRole } from '../middleware/authorization.middleware';
 import { Role } from "../generated/prisma/enums";
 
@@ -12,5 +12,6 @@ divisionRouter.delete("/remove", requireRole(Role.HOD, Role.PROFESSOR), removeSt
 divisionRouter.delete("/delete", requireRole(Role.HOD), deleteDivisionHandler);
 divisionRouter.get("/sem/students", getStudentsOfSemesterHandler);
 divisionRouter.get("/students/:divisionId", getStudents);
+divisionRouter.get("/professors", getProfessorsByDepartmentHandler);
 
 export default divisionRouter

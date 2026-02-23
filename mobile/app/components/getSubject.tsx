@@ -1,6 +1,9 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import React, { useMemo, useState, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useSubjectStore } from "@/src/store/subjectStore";
+import colors from "@/src/config/colors";
 
 const SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const DEPARTMENTS = [
@@ -17,6 +20,7 @@ const GetSubject = () => {
     const [department, setDepartment] = useState<string | null>(null);
 
     const { subjects, loading, getAllSubjects } = useSubjectStore();
+    const router = useRouter();
 
     useEffect(() => {
         if (open) {
@@ -39,7 +43,7 @@ const GetSubject = () => {
                 <Text className="text-white text-lg font-semibold">
                     Get Subject
                 </Text>
-                <Text className="text-gray-400 text-sm mt-1">
+                <Text className="text-textMuted text-sm mt-1">
                     Filter by semester & department
                 </Text>
             </TouchableOpacity>
@@ -68,7 +72,7 @@ const GetSubject = () => {
                                     className={`text-sm ${
                                         department === d.id
                                             ? "text-accent"
-                                            : "text-gray-400"
+                                            : "text-textMuted"
                                     }`}
                                 >
                                     {d.label}
@@ -96,7 +100,7 @@ const GetSubject = () => {
                                     className={`text-sm ${
                                         semester === s
                                             ? "text-accent"
-                                            : "text-gray-400"
+                                            : "text-textMuted"
                                     }`}
                                 >
                                     Sem {s}
@@ -106,15 +110,17 @@ const GetSubject = () => {
                     </View>
 
                     {loading && (
-                        <Text className="text-gray-400 text-sm">
+                        <Text className="text-textMuted text-sm">
                             Fetching subjects...
                         </Text>
                     )}
 
                     {!loading &&
                         filteredSubjects.map((subject) => (
-                            <View
+                            <TouchableOpacity
                                 key={subject.id}
+                                onPress={() => router.push(`/screens/subject/${subject.id}`)}
+                                activeOpacity={0.7}
                                 className="mt-2 bg-black/30 p-4 rounded-xl border border-white/5"
                             >
                                 <View className="flex-row justify-between items-start">
@@ -122,27 +128,30 @@ const GetSubject = () => {
                                         <Text className="text-white font-semibold">
                                             {subject.name}
                                         </Text>
-                                        <Text className="text-gray-400 text-xs mt-1">
+                                        <Text className="text-textMuted text-xs mt-1">
                                             Code: {subject.code}
                                         </Text>
                                         {subject.description && (
-                                            <Text className="text-gray-500 text-xs mt-2">
+                                            <Text className="text-textDim text-xs mt-2">
                                                 {subject.description}
                                             </Text>
                                         )}
                                     </View>
 
-                                    <View className="bg-accent/20 px-3 py-1 rounded-full">
-                                        <Text className="text-accent text-xs font-semibold">
-                                            Sem {subject.semesterId}
-                                        </Text>
+                                    <View className="flex-row items-center gap-2">
+                                        <View className="bg-accent/20 px-3 py-1 rounded-full">
+                                            <Text className="text-accent text-xs font-semibold">
+                                                Sem {subject.semesterId}
+                                            </Text>
+                                        </View>
+                                        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                                     </View>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         ))}
 
                     {!loading && filteredSubjects.length === 0 && (semester || department) && (
-                        <Text className="text-gray-400 text-sm text-center py-4">
+                        <Text className="text-textMuted text-sm text-center py-4">
                             No subjects found for the selected filters
                         </Text>
                     )}

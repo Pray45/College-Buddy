@@ -414,3 +414,43 @@ export const deleteDivisionHandler = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getProfessorsByDepartmentHandler = async (req: Request, res: Response) => {
+    try {
+        const { departmentId } = req.query as { departmentId?: string };
+
+        if (!departmentId) {
+            CreateError(400, "departmentId is required", "getProfessorsByDepartmentHandler");
+        }
+
+        const professors = await prisma.professor.findMany({
+            where: { departmentId: departmentId as string },
+            include: {
+                User: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        verificationStatus: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        const approved = professors.filter(p => p.User.verificationStatus === 'APPROVED');
+
+        res.status(200).json({
+            result: true,
+            message: "Fetched professors successfully",
+            data: { professors: approved },
+        });
+    } catch (error: any) {
+        console.error("Error in getProfessorsByDepartmentHandler:", error);
+        res.status(error.statusCode || 500).json({
+            result: false,
+            message: "Internal server error in getProfessorsByDepartmentHandler",
+            error,
+        });
+    }
+};

@@ -42,7 +42,7 @@ const GetDivision = () => {
                 <Text className="text-white text-lg font-semibold">
                     Get Division
                 </Text>
-                <Text className="text-gray-400 text-sm mt-1">
+                <Text className="text-textMuted text-sm mt-1">
                     Filter by semester & department
                 </Text>
             </TouchableOpacity>
@@ -71,7 +71,7 @@ const GetDivision = () => {
                                     className={`text-sm ${
                                         department === d.id
                                             ? "text-accent"
-                                            : "text-gray-400"
+                                            : "text-textMuted"
                                     }`}
                                 >
                                     {d.label}
@@ -99,7 +99,7 @@ const GetDivision = () => {
                                     className={`text-sm ${
                                         semester === s
                                             ? "text-accent"
-                                            : "text-gray-400"
+                                            : "text-textMuted"
                                     }`}
                                 >
                                     Sem {s}
@@ -109,7 +109,7 @@ const GetDivision = () => {
                     </View>
 
                     {loading && (
-                        <Text className="text-gray-400 text-sm">
+                        <Text className="text-textMuted text-sm">
                             Fetching divisions...
                         </Text>
                     )}
@@ -125,7 +125,7 @@ const GetDivision = () => {
                                     <Text className="text-white font-semibold">
                                         Division {div.name}
                                     </Text>
-                                    <Text className="text-gray-400 text-xs">
+                                    <Text className="text-textMuted text-xs">
                                         Semester {div.semesterId} · Dept{" "}
                                         {div.departmentId}
                                     </Text>
