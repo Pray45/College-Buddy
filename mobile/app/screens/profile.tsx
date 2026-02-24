@@ -137,7 +137,7 @@ const Profile = () => {
                 </View>
               </View>
 
-              {userData.subjects && userData.subjects.length > 0 && (
+              {/* {userData.subjects && userData.subjects.length > 0 && (
                 <>
                   <View className="mx-0 border-b border-border" />
                   <View className='flex-row items-start my-4'>
@@ -152,9 +152,9 @@ const Profile = () => {
                     </View>
                   </View>
                 </>
-              )}
+              )} */}
 
-              {userData.savednotes && userData.savednotes.length > 0 && (
+              {/* {userData.savednotes && userData.savednotes.length > 0 && (
                 <>
                   <View className="mx-0 border-b border-border" />
                   <View className='flex-row items-center mt-4'>
@@ -165,7 +165,7 @@ const Profile = () => {
                     </View>
                   </View>
                 </>
-              )}
+              )} */}
             </View>
           </>
         )}

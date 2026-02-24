@@ -101,6 +101,33 @@ export const getSubjectByDeoartrmentHandler = async (req: Request, res: Response
 export const getAllSubjectsHandler = async (req: Request, res: Response) => {
     try {
         const subjects = await prisma.subject.findMany({
+            include: {
+                department: { select: { id: true, name: true } },
+                semester: { select: { id: true, number: true, departmentId: true } },
+                DivisionSubjectAssignment: {
+                    include: {
+                        Division: { select: { id: true, name: true } },
+                        Professor: {
+                            include: {
+                                User: { select: { id: true, name: true, email: true } },
+                            },
+                        },
+                    },
+                },
+                StudentSubject: {
+                    include: {
+                        Student: {
+                            select: {
+                                id: true,
+                                enrollmentNo: true,
+                                divisionId: true,
+                                User: { select: { id: true, name: true, email: true } },
+                                Division: { select: { id: true, name: true } },
+                            },
+                        },
+                    },
+                },
+            },
             orderBy: [
                 { departmentId: 'asc' },
                 { semesterId: 'asc' },
@@ -250,6 +277,34 @@ export const getSubjectDetailsHandler = async (req: Request, res: Response) => {
         res.status(500).json({
             result: false,
             message: "Internal server error in get subject details handler",
+            error,
+        });
+    }
+};
+
+export const getFilterOptionsHandler = async (_req: Request, res: Response) => {
+    try {
+        const [departments, semesters] = await Promise.all([
+            prisma.department.findMany({
+                select: { id: true, name: true },
+                orderBy: { name: "asc" },
+            }),
+            prisma.semester.findMany({
+                select: { id: true, number: true, departmentId: true },
+                orderBy: [{ departmentId: "asc" }, { number: "asc" }],
+            }),
+        ]);
+
+        res.status(200).json({
+            result: true,
+            message: "Filter options fetched successfully",
+            data: { departments, semesters },
+        });
+    } catch (error) {
+        console.error("error in fetching filter options", error);
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in get filter options handler",
             error,
         });
     }

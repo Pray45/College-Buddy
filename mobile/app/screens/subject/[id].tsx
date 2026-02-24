@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
+	Alert,
 	RefreshControl,
 	ScrollView,
 	Text,
@@ -55,6 +56,34 @@ const SubjectDetailsScreen = () => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [expandedDivision, setExpandedDivision] = useState<string | null>(null);
+	const [deassigning, setDeassigning] = useState<string | null>(null);
+
+	const handleDeassign = (assignmentId: string, divisionName: string) => {
+		Alert.alert(
+			"Deassign Division",
+			`Remove Division ${divisionName} from this subject? This will also unenroll all students of that division.`,
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Deassign",
+					style: "destructive",
+					onPress: async () => {
+						setDeassigning(assignmentId);
+						try {
+							await api.delete("/assign-tchr/delete", { data: { id: assignmentId } });
+							Alert.alert("Success", "Division deassigned successfully");
+							setExpandedDivision(null);
+							fetchDetails(true);
+						} catch (err: string | any) {
+							Alert.alert("Error", extractErrorMessage(err));
+						} finally {
+							setDeassigning(null);
+						}
+					},
+				},
+			]
+		);
+	};
 
 	const fetchDetails = async (isRefresh = false) => {
 		if (!id) return;
@@ -261,7 +290,31 @@ const SubjectDetailsScreen = () => {
 												<Text className="text-textDim text-sm">No teacher assigned</Text>
 											)}
 										</View>
-
+									{/* Deassign Button */}
+									<TouchableOpacity
+										onPress={() =>
+											handleDeassign(
+												assignment.id,
+												assignment.Division?.name ?? assignment.divisionId
+											)
+										}
+										disabled={deassigning === assignment.id}
+										className="mb-3 p-3 rounded-lg bg-danger/10 border border-danger/30 flex-row items-center justify-between"
+									>
+										<View>
+											<Text className="text-danger font-semibold text-sm">
+												Deassign Division
+											</Text>
+											<Text className="text-dangerText/70 text-xs mt-0.5">
+												Removes teacher & unenrolls all students
+											</Text>
+										</View>
+										{deassigning === assignment.id ? (
+											<ActivityIndicator size="small" color={colors.danger} />
+										) : (
+											<Ionicons name="trash" size={18} color={colors.danger} />
+										)}
+									</TouchableOpacity>
 										{/* Students */}
 										<View className="p-3 rounded-lg bg-black/20 border border-white/5">
 											<View className="flex-row items-center justify-between mb-2">

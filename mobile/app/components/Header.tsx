@@ -25,12 +25,12 @@ export default function CustomHeader() {
 
                         user?.role !== "STUDENT" ? (
                             <TouchableOpacity onPress={() => router.replace("/(admin)")} className="p-2.5 rounded-full bg-accent justify-center items-center">
-                                <Text className="text-white text-lg font-bold">Dashboard</Text>
+                                <Ionicons name="person" size={24} color={colors.textWhite} />
                             </TouchableOpacity>
                         ) : (
 
-                            <TouchableOpacity onPress={() => router.push("../screens/profile")} className="w-12 h-12 rounded-full bg-accent justify-center items-center">
-                                <Ionicons name="person" size={24} color={colors.textWhite} />
+                            <TouchableOpacity onPress={() => router.push("../(student)")} className="w-12 h-12 rounded-full bg-accent justify-center items-center">
+                                <Ionicons name="person-outline" size={24} color={colors.textWhite} />
                             </TouchableOpacity>
 
                         )

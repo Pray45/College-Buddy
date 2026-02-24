@@ -3,6 +3,59 @@ import { CreateError } from '../config/Error'
 import {prisma} from '../config/database'
 import { EnrollmentStatus } from "../generated/prisma/enums"
 
+export const getStudentSubjectsHandler = async (req: Request, res: Response) => {
+    try {
+        const { enrollmentNo } = req.params;
+
+        if (!enrollmentNo) {
+            CreateError(400, "enrollmentNo is required", "getStudentSubjects");
+        }
+
+        const student = await prisma.student.findUnique({
+            where: { enrollmentNo },
+            select: { id: true },
+        });
+
+        if (!student) {
+            CreateError(404, "Student not found", "getStudentSubjects");
+        }
+
+        const enrollments = await prisma.studentSubject.findMany({
+            where: { studentId: student!.id },
+            include: {
+                Subject: {
+                    include: {
+                        DivisionSubjectAssignment: {
+                            include: {
+                                Division: true,
+                                Professor: {
+                                    include: { User: { select: { name: true } } },
+                                },
+                            },
+                        },
+                        semester: true,
+                        department: true,
+                    },
+                },
+            },
+            orderBy: { enrolledAt: "desc" },
+        });
+
+        res.status(200).json({
+            result: true,
+            message: "Student subjects fetched successfully",
+            data: enrollments,
+        });
+    } catch (error) {
+        console.error("error in fetching student subjects");
+        res.status(500).json({
+            result: false,
+            message: "Internal server error in fetching student subjects",
+            error,
+        });
+    }
+};
+
 export const enrollStudentsHandler = async (req: Request, res: Response) => {
 
     try {

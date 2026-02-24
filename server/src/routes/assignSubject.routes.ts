@@ -5,8 +5,8 @@ import { Role } from "../generated/prisma/enums";
 
 const assignRoutrer: Router = express.Router();
 
-assignRoutrer.post('/create',  assignTeacherHandler);
+assignRoutrer.post('/create', requireRole(Role.HOD), assignTeacherHandler);
 assignRoutrer.get('/get/div', getAssignedHandler)
-assignRoutrer.delete('/delete', requireRole(Role.HOD, Role.PROFESSOR), deleteAssignedHanlder);
+assignRoutrer.delete('/delete', requireRole(Role.HOD), deleteAssignedHanlder);
 
 export default assignRoutrer

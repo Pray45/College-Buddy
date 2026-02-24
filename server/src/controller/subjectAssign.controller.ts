@@ -112,16 +112,37 @@ export const deleteAssignedHanlder = async (req: Request, res: Response) => {
             CreateError(400, "invalid id", "deleting assigned handler");
         }
 
-        const assignedsub = await prisma.divisionSubjectAssignment.findUnique({ where: { id } });
-        if (!assignedsub) {
+        const assignment = await prisma.divisionSubjectAssignment.findUnique({ where: { id } });
+        if (!assignment) {
             CreateError(404, "assigned subject not found", "delete assigned handler");
         }
 
-        await prisma.divisionSubjectAssignment.delete({ where: { id } });
+        // Find all students belonging to the assigned division
+        const divisionStudents = await prisma.student.findMany({
+            where: { divisionId: assignment!.divisionId },
+            select: { id: true },
+        });
+
+        const studentIds = divisionStudents.map((s) => s.id);
+
+        // Delete student enrollments for this subject from that division + the assignment itself
+        await prisma.$transaction([
+            ...(studentIds.length > 0
+                ? [
+                      prisma.studentSubject.deleteMany({
+                          where: {
+                              subjectId: assignment!.subjectId,
+                              studentId: { in: studentIds },
+                          },
+                      }),
+                  ]
+                : []),
+            prisma.divisionSubjectAssignment.delete({ where: { id } }),
+        ]);
 
         res.status(200).json({
             result: true,
-            message: "deleted assigned subject successfully"
+            message: `Division deassigned and ${studentIds.length} student enrolments removed`,
         });
 
     } catch (error) {
