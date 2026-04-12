@@ -2,6 +2,7 @@ import "./global.css";
 import { Redirect, Slot, useSegments } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomHeader from "./components/Header";
+import SideNavigation from "./components/SideNavigation";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../src/store/authStore";
 import { initAuthInterceptors } from "../src/config/authInterceptor";
@@ -57,10 +58,13 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-secondary">
-      {!inAuth && <CustomHeader />}
-      <Slot />
-      <Toast/>
-    </SafeAreaView>
+    <>
+      <SafeAreaView className="flex-1 bg-secondary">
+        {!inAuth && <CustomHeader />}
+        <Slot />
+        <Toast/>
+      </SafeAreaView>
+      {!inAuth && <SideNavigation />}
+    </>
   );
 }

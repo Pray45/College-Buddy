@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from "../../src/store/authStore";
+import { useSideNavStore } from "../../src/store/sideNavStore";
 import { useRouter } from "expo-router";
 import colors from "../../src/config/colors";
 
@@ -10,6 +11,7 @@ export default function CustomHeader() {
     const router = useRouter();
     const login = useAuthStore((state) => state.loggedIn);
     const user = useAuthStore((state) => state.userData);
+    const toggleSideNav = useSideNavStore((state) => state.toggleSideNav);
 
     return (
         <>
@@ -22,18 +24,9 @@ export default function CustomHeader() {
 
                 {
                     login && (
-
-                        user?.role !== "STUDENT" ? (
-                            <TouchableOpacity onPress={() => router.replace("/(admin)")} className="p-2.5 rounded-full bg-accent justify-center items-center">
-                                <Ionicons name="person" size={24} color={colors.textWhite} />
-                            </TouchableOpacity>
-                        ) : (
-
-                            <TouchableOpacity onPress={() => router.push("../(student)")} className="w-12 h-12 rounded-full bg-accent justify-center items-center">
-                                <Ionicons name="person-outline" size={24} color={colors.textWhite} />
-                            </TouchableOpacity>
-
-                        )
+                        <TouchableOpacity onPress={toggleSideNav} className="p-2.5 rounded-full bg-accent justify-center items-center">
+                            <Ionicons name="menu" size={24} color={colors.textWhite} />
+                        </TouchableOpacity>
                     )
                 }
 
